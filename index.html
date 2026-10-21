@@ -78,7 +78,7 @@ const ROSTER={
   child:{name:'THE CHILD',tip:'Scary aura, screaming crowd. Always let the Child pass. The crowd is wrong.',at:40},
 };
 let S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
-let fig=null,t0=0,win=2200,lurk=0,res=null,card=null,shake=0,rule=null,ruleLeft=0,seen=new Set(),force=null,boil=0,boilT=0,msg=null;
+let fig=null,t0=0,win=2200,lurk=0,res=null,card=null,shake=0,rule=null,ruleLeft=0,seen=new Set(),force=null,learnType=null,learnLeft=0,nextRule=16,boil=0,boilT=0,msg=null;
 try{S.best=+localStorage.getItem('palm_best')||0}catch(e){}
 const SET={music:.7,sfx:.8,shake:true,flashes:true,haptics:true};try{Object.assign(SET,JSON.parse(localStorage.getItem("palm_settings")||"{}"))}catch(e){}
 function saveSet(){try{localStorage.setItem("palm_settings",JSON.stringify(SET))}catch(e){}}
@@ -89,11 +89,13 @@ function j(k){const s=Math.sin(boil*12.9898+k*78.233)*43758.5453;return (s-Math.
 function layer(k,fn){g.save();g.translate(j(k)*1.6,j(k+1)*1.6);g.rotate(j(k+2)*.004);fn();g.restore()}
 function poly(p,k=0){g.beginPath();p.forEach(([x,y],i)=>{const dx=j(k+i)*1.5,dy=j(k+i+9)*1.5;i?g.lineTo(x+dx,y+dy):g.moveTo(x+dx,y+dy)});g.closePath()}
 
-function pickType(){const b=S.beat,unlocked=Object.entries(ROSTER).filter(([k,v])=>b>=v.at).map(([k])=>k);
-  // rotation, not stacking: wanderer + the 2 newest specials; the newest one shows up most
-  const sp=unlocked.slice(1).slice(-2);let pool=['wanderer',...sp,...(sp.length?[sp[sp.length-1]]:[])];
-  if(shiftMod==='ALL')pool=['wanderer',...unlocked.slice(1)];if(shiftMod==='ONE')pool=[oneType];
-  const fresh=unlocked.find(k=>!seen.has(k));if(fresh)return fresh;return pool[Math.floor(Math.random()*pool.length)]}
+// learn, then mix: right after a debut only the newcomer and the Wanderer come;
+// after that, everyone you've met, the two newest a little more often. Never an unseen type.
+function pickType(){if(learnLeft>0)return Math.random()<.67?learnType:'wanderer';
+  const sp=Object.keys(ROSTER).filter(k=>k!=='wanderer'&&seen.has(k));let pool=['wanderer',...sp,...sp.slice(-2)];
+  if(shiftMod==='ALL')pool=['wanderer',...sp];if(shiftMod==='ONE')pool=[oneType];
+  return pool[Math.floor(Math.random()*pool.length)]}
+const debutDue=()=>Object.keys(ROSTER).find(k=>S.beat>=ROSTER[k].at&&!seen.has(k));
 const R=(a,b)=>a+Math.random()*(b-a),RI=n=>Math.floor(Math.random()*n);
 const SKIN=['#ffffff','#f6ead8','#ead2b4','#d3ad87','#a87a56','#7d5539'];
 let lastClassic=false;
@@ -122,8 +124,8 @@ function correctAct(f,k){
 }
 function maybeIntro(){
   // first time a character type appears, show its card
-  const type=pickType();
-  if(!seen.has(type)){seen.add(type);force=type;card={kind:'intro',type,t:performance.now()};S.mode='card';tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120);return true}
+  const type=debutDue();
+  if(type){seen.add(type);force=type;learnType=type;learnLeft=4;card={kind:'intro',type,t:performance.now()};S.mode='card';tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120);return true}
   return false;
 }
 const MODS={ALL:['ALL HANDS','Every arrival you have met, all at once.'],FAST:['DOUBLE TIME','Everything comes 25% faster.'],NIGHT:['NIGHT SHIFT','The crowd is asleep. You are on your own.'],ONE:['ONE FACE','The same kind of arrival, over and over.']};
@@ -133,12 +135,12 @@ function newShift(){
   card={kind:'shift',t:performance.now()};S.mode='card';tone(392,.15,'triangle',.12);setTimeout(()=>tone(523,.15,'triangle',.12),150);setTimeout(()=>tone(659,.25,'triangle',.12),300);
 }
 function startBeat(){
-  if(ruleLeft>0){ruleLeft--}else{rule=null;if(S.beat>10&&S.beat%10===6&&shiftMod!=='ONE'){rule=Math.random()<.5?'ALL':'NONE';ruleLeft=3;card={kind:'rule',txt:rule==='ALL'?'LET NOTHING PASS':'MERCY: PASS EVERYONE',t:performance.now()};S.mode='card';tone(220,.3,'sawtooth',.1);return}}
+  if(ruleLeft>0){ruleLeft--}else{rule=null;if(S.beat>=nextRule&&!learnLeft&&!debutDue()&&shiftMod!=='ONE'){nextRule=S.beat+10;rule=Math.random()<.5?'ALL':'NONE';ruleLeft=3;card={kind:'rule',txt:rule==='ALL'?'LET NOTHING PASS':'MERCY: PASS EVERYONE',t:performance.now()};S.mode='card';tone(220,.3,'sawtooth',.1);return}}
   if(!rule&&maybeIntro())return;
   spawn();
 }
 function spawn(){
-  fig=newFig();
+  fig=newFig();if(learnLeft>0)learnLeft--;
   win=Math.max(900,2200-S.beat*55);if(S.beat>40)win=Math.max(600,900-(S.beat-40)*8);if(shiftMod==='FAST')win*=.75;
   if(fig.type==='sleeper'){const ms=150+Math.pow(Math.random(),1.6)*2200;win+=ms;fig.openAt=ms/win} // wildly variable nap: blink-short to agonizing
   // lurk: variable silence before the reveal. Wider spread as the run goes on.
@@ -154,7 +156,7 @@ function kiBoom(){buzz(45);shake=Math.max(shake,18);tone(85,.55,'sine',.45,30);t
 function strike(text,kind='flee'){const alive=OL.filter(o=>!o.gone);if(alive.length){const o=alive[RI(alive.length)];o.gone=performance.now();o.kind=kind}S.strikes++;S.combo=1;shake=16;buzz([50,40,50]);msg={text,t:performance.now()};missT=performance.now();missSeed=Math.random()*100;tone(70,.4,'square',.18,45)}
 function act(a){
   const now=performance.now();if(!panelEl.hidden)return;
-  if(S.mode==='title'||S.mode==='over'){hideBoard();menuLinks.hidden=true;startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});S={...S,mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0,shift:1};shiftMod=null;lastShift=0;rule=null;ruleLeft=0;seen=new Set();startBeat();return}
+  if(S.mode==='title'||S.mode==='over'){hideBoard();menuLinks.hidden=true;startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});S={...S,mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0,shift:1};shiftMod=null;lastShift=0;rule=null;ruleLeft=0;seen=new Set();learnLeft=0;nextRule=16;startBeat();return}
   if(paused){resume();return}
   if(S.mode==='card'&&card.kind==='intro'&&now-card.t>500){spawn();return}
   if(S.mode==='lurk'&&t0+lurk-now<=80){buffered=a;return}
@@ -410,13 +412,13 @@ function frame(t){
   if(rule&&S.mode!=='card')txt(rule==='ALL'?'LET NOTHING PASS':'MERCY',390,30,22,C.violet);
   if(S.mode==='resolve'&&res.a==='blast'){
     // hakai: instant. the face crumbles into ink flakes that drift up and dissolve into the white
-    const q=(t-res.t)/res.dur,imp=SET.flashes&&q>=0&&q<.07;
-    if(q>=0&&q<.15&&!imp){g.fillStyle=C.violet;g.globalAlpha=.5;poly(TOP);g.fill();g.globalAlpha=1}
+    const q=(t-res.t)/res.dur;
+    if(q>=0&&q<.15){g.fillStyle=C.violet;g.globalAlpha=.5;poly(TOP);g.fill();g.globalAlpha=1}
     if(res.fx==='crumble'&&q>=.03&&q<.75){const cq=(q-.03)/.72;g.save();poly(TOP);g.clip();
       res.shards.forEach(sh=>{const a=Math.max(0,1-cq*1.3);if(!a)return;g.globalAlpha=a;g.save();g.translate(420+sh.x+cq*sh.v*60,230+sh.y-cq*sh.v*170);g.rotate(sh.r+cq*sh.v*3);const z=sh.s*(1-cq*.6);g.fillStyle=sh.ink?C.ink:'#fff';g.strokeStyle=C.ink;g.lineWidth=1.5;g.beginPath();g.moveTo(-z,-z*.4);g.lineTo(z*.7,-z*.8);g.lineTo(z,z*.5);g.lineTo(-z*.2,z*.7);g.closePath();g.fill();if(!sh.ink)g.stroke();g.restore()});
       g.restore();g.globalAlpha=1}
     let a=q<.15?Math.max(0,q)/.15:q<.55?1:Math.max(0,1-(q-.55)/.45);if(!SET.flashes)a*=.55;
-    if(!imp){g.fillStyle=`rgba(255,255,255,${a*.85})`;g.fillRect(-20,-20,640,840)}else{g.save();g.globalCompositeOperation='difference';g.fillStyle='#fff';g.fillRect(-20,-20,640,840);g.restore()}
+    g.fillStyle=`rgba(255,255,255,${a*.85})`;g.fillRect(-20,-20,640,840);
     if(q>.2&&q<.7)txt('BLASTED',300,420,90,C.violet);
   }
   if(S.mode==='resolve'&&res.a==='pass'&&(t-res.t)<550)txt('PASSED',300,420,90,C.dim);
