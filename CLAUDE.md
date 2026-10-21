@@ -29,7 +29,7 @@ The game got better every time something was cut. Treat these as hard constraint
 
 | Character | Beat | Rule |
 | --- | --- | --- |
-| Wanderer | 0 | Read aura, then eyes |
+| Wanderer | 0 | Watch the eyes. The aura can lie (intro card says exactly this) |
 | Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = FLINCHED |
 | Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = FLINCHED |
 | Twins | 23 | Two faces. Blast if either is a threat |

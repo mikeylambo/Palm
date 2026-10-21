@@ -2,7 +2,7 @@
 export const C={paper:'#eef59a',ink:'#111014',violet:'#7b5bd6',threat:'#e0304a',grace:'#e2a92b',dim:'#55534a'};
 export const TOP=[[175,60],[580,40],[580,440],[205,480]], BOT=[[250,520],[580,478],[580,780],[285,780]];
 export const ROSTER={
-  wanderer:{name:'WANDERER',tip:'Read the aura, then the eyes.',at:0},
+  wanderer:{name:'WANDERER',tip:'Watch the eyes. The aura can lie.',at:0},
   lurker:{name:'LURKER',tip:'A shadow that sometimes never comes. Do not flinch.',at:10},
   sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Move first and you flinch.',at:16},
   twins:{name:'TWINS',tip:'Two faces, one verdict. Blast if either one is a threat.',at:23},
