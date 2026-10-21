@@ -71,10 +71,10 @@ const TOP=[[175,60],[580,40],[580,440],[205,480]], BOT=[[250,520],[580,478],[580
 const ROSTER={
   wanderer:{name:'WANDERER',tip:'Read the aura, then the eyes.',at:0},
   lurker:{name:'LURKER',tip:'A shadow that sometimes never comes. Do not flinch.',at:10},
-  sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Acting first is a strike.',at:16},
+  sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Move first and you flinch.',at:16},
   herald:{name:'HERALD',tip:'Carries a sealed scroll. Always let a Herald pass, whatever its aura.',at:23},
   twins:{name:'TWINS',tip:'Two faces, one verdict. Blast if either one is a threat.',at:29},
-  turncoat:{name:'TURNCOAT',tip:'Smiles at first. Wait: some turn. Strike too early and you strike an innocent.',at:35},
+  turncoat:{name:'TURNCOAT',tip:'Smiles at first. Some turn. Move before the turn and you flinch.',at:35},
   child:{name:'THE CHILD',tip:'Scary aura, screaming crowd. Always let the Child pass. The crowd is wrong.',at:40},
 };
 let S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
@@ -106,7 +106,7 @@ function newFig(){
   const disguise=b>=10&&Math.random()<Math.min(.5,(b-8)*.04);
   const f={type,threat,look:newLook(),empty:false,turnAt:0,turned:false,openAt:0};
   if(type==='herald'){f.threat=false;f.aura=Math.random()<.6?C.threat:C.grace;f.slit=Math.random()<.5;f.smile=false}
-  else if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.grace;f.slit=false;f.smile=true;f.turnAt=.3+Math.random()*.3}
+  else if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.grace;f.slit=false;f.smile=true;f.turnAt=.2+Math.random()*.55}
   else if(type==='lurker'){f.empty=Math.random()<.35;f.aura=threat?C.threat:C.grace;f.slit=threat;f.smile=!threat;if(f.empty)f.threat=false}
   else if(type==='sleeper'){f.aura=C.violet;f.slit=threat;f.smile=!threat;f.openAt=.2+Math.random()*.35}
   else if(type==='mirror'){f.aura=Math.random()<.5?C.threat:C.grace;f.slit=!threat;f.smile=Math.random()<.5}
@@ -140,13 +140,13 @@ function startBeat(){
   spawn();
 }
 function spawn(){
-  fig=newFig();if(learnLeft>0)learnLeft--;
-  win=Math.max(900,2200-S.beat*55);if(S.beat>40)win=Math.max(600,900-(S.beat-40)*8);if(shiftMod==='FAST')win*=.75;
+  fig=newFig();const learning=learnLeft>0;if(learning)learnLeft--;
+  win=Math.max(1200,2200-S.beat*55);if(shiftMod==='FAST')win*=.75;
   if(fig.type==='sleeper'){const ms=150+Math.pow(Math.random(),1.6)*2200;win+=ms;fig.openAt=ms/win} // wildly variable nap: blink-short to agonizing
   // lurk: variable silence before the reveal. Wider spread as the run goes on.
   const spread=Math.min(1700,500+S.beat*60);lurk=250+Math.random()*spread;
   if(fig.type==='lurker'&&Math.random()<.5)lurk+=500;
-  if(fig.type!=='lurker')lurk=0; // v1: arrivals pop in instantly; only the Lurker makes you wait
+  if(fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<Math.min(.35,(S.beat-10)*.02)))lurk=0; // most arrivals pop in instantly; once the Lurker is known, some come out of the shadow
   nextThump=performance.now()+120;
   t0=performance.now();S.mode='lurk';
 }
@@ -160,16 +160,17 @@ function act(a){
   if(paused){resume();return}
   if(S.mode==='card'&&card.kind==='intro'&&now-card.t>500){spawn();return}
   if(S.mode==='lurk'&&t0+lurk-now<=80){buffered=a;return}
-  if(S.mode==='lurk'){strike('FLINCHED');tone(140,.2,'square',.12);res={a:'flinch',ok:false,t:now,dur:500};S.mode='resolve';S.beat++;return}
+  const flinch=()=>{strike('FLINCHED');tone(140,.2,'square',.12);res={a:'flinch',ok:false,t:now,dur:500,lurk:S.mode==='lurk'};S.mode='resolve';S.beat++};
+  if(S.mode==='lurk'){flinch();return}
   if(S.mode!=='beat')return;
   const rt=now-t0-lurk,k=rt/win,want=correctAct(fig,k);
+  if(want==='early'||fig.empty&&a==='blast'){flinch();return}
   const ok=a===want;
-  if(fig.empty){ // empty lurk: only a blast is wrong
-    if(a==='blast')strike('BLASTED THIN AIR');else{S.score+=50*S.combo;S.combo=Math.min(8,S.combo+1)}
-  }else if(ok){S.score+=Math.round(100*S.combo+(rt<400?50:0)+(fig.type==='turncoat'&&fig.threat||fig.type==='sleeper'||fig.type==='child'?75:0));S.combo=Math.min(8,S.combo+1)}
-  else strike(want==='early'?(fig.type==='sleeper'?'WOKE IT EARLY':a==='blast'?'STRUCK AN INNOCENT':'TOO EARLY'):fig.type==='child'&&a==='blast'?'YOU BLASTED A CHILD':a==='blast'?'STRUCK A FRIEND':'IT GOT THROUGH',a==='pass'?'ko':'flee');
+  if(fig.empty){S.score+=50*S.combo;S.combo=Math.min(8,S.combo+1)}
+  else if(ok){S.score+=Math.round(100*S.combo+(rt<400?50:0)+(fig.type==='turncoat'&&fig.threat||fig.type==='sleeper'||fig.type==='child'?75:0));S.combo=Math.min(8,S.combo+1)}
+  else strike(fig.type==='child'&&a==='blast'?'YOU BLASTED A CHILD':a==='blast'?'STRUCK A FRIEND':'IT GOT THROUGH',a==='pass'?'ko':'flee');
   if(a==='blast'){S.heat=Math.min(1,S.heat+.25);}else{S.heat=Math.max(0,S.heat-.2);tone(300,.25,'sine',.14,200)}
-  const good=fig.empty?a!=='blast':ok;res={a,ok:good,t:now+(good?85:0),dur:a==='blast'?450+S.heat*350:650};
+  const good=fig.empty||ok;res={a,ok:good,t:now+(good?85:0),dur:a==='blast'?450+S.heat*350:650};
   if(a==='blast'){res.fx=['fling','crumble','cover'][Math.floor(Math.random()*3)];res.shards=Array.from({length:26},()=>({x:(Math.random()-.5)*110,y:(Math.random()-.5)*130,v:.5+Math.random(),s:3+Math.random()*7,r:Math.random()*6,ink:Math.random()<.6}));setTimeout(kiBoom,Math.max(0,res.t-now))}S.mode='resolve';S.beat++;
 }
 
@@ -380,7 +381,7 @@ function frame(t){
   const k=fig?(t-t0-lurk)/win:0;
   if(fig)fig.react=S.mode==='resolve'?(res.a==='blast'?'panic':res.a==='pass'?'wave':null):null;
   if(S.mode==='lurk'){drawShadow(t,Math.min(1,(t-t0)/lurk));onl='tense'}
-  else if(fig&&(S.mode==='beat'||S.mode==='resolve')&&res?.a!=='flinch'||S.mode==='beat'){
+  else if(fig&&(S.mode==='beat'||S.mode==='resolve')&&!res?.lurk||S.mode==='beat'){
     const f=fig;
     if(f.empty){drawShadow(t,Math.max(0,1-k*2));onl='tense'}
     else if(S.mode==='resolve'&&res.a!=='blast'){
