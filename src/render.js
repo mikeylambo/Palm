@@ -57,8 +57,9 @@ function face(L,o){ // parametric head: o={slit,smile,turned,closed,big,react}
   const E=o.big?1.4:1,ex=w*.42,ey=-h*.05;
   // brows
   const T=performance.now(),pan=o.react==='panic';
-  let dl=0,dr=0;if(L.bg==='raised')dr=-10;if(pan){dl=dr=-16}
-  g.lineWidth=L.brow;g.beginPath();g.moveTo(-ex-14,ey-20+dl);g.lineTo(-ex+12,(o.smile?ey-22:ey-10)+dl);g.moveTo(ex+14,ey-20+dr);g.lineTo(ex-12,(o.smile?ey-22:ey-10)+dr);g.stroke();
+  let dl=0,dr=0;if(L.bg==='wiggle'){dl=Math.sin(T/320)*3;dr=Math.sin(T/320+2)*3}if(L.bg==='raised')dr=-10;if(pan){dl=dr=-16}
+  g.lineWidth=L.brow;g.beginPath();g.moveTo(-ex-14,ey-20+dl);g.lineTo(-ex+12,(o.smile?ey-22:ey-10)+dl);g.moveTo(ex+14,ey-20+dr);g.lineTo(ex-12,(o.smile?ey-22:ey-10)+dr);
+  if(L.bg==='uni'&&!pan){g.moveTo(-ex+12,(o.smile?ey-22:ey-10)+dl);g.quadraticCurveTo(0,ey-4,ex-12,(o.smile?ey-22:ey-10)+dr)}g.stroke();
   // eyes
   g.lineWidth=3;[-ex,ex].forEach(x=>{
     if(o.closed){g.beginPath();g.arc(x,ey-2,11*E,.15*Math.PI,.85*Math.PI);g.stroke();return}
