@@ -49,6 +49,7 @@ Three onlookers (bowl cut, spiky, topknot). Letting a threat through knocks one 
 - `src/audio.js`: synthesized sfx (`tone()`, `kiBoom()`), haptics, music volume/ducking
 - `src/ui.js`: keys, buttons, swipes, pause button, menus (`openPanel()`, `closePanel()`, `showMenu()`, `#menu-links`)
 - `src/leaderboard.js`: shared Supabase project `leaderboards`, table `scores`, rows tagged `game: 'palm'` (same setup as `neonstriker/src/systems/online.js`). Publishable key is client-safe; RLS protects the table. There is also a `window.claude` db path used only when the game runs as a claude.ai artifact; it is inert on Vercel.
+- `tests/playthrough.mjs` (`npm test`): headless Playwright run on a seeded virtual clock; plays until every type appears, checks intro cards, pause keys, TITLE, game over and console errors. `.vercelignore` keeps tests and `package.json` out of the deploy, so Vercel stays a static site.
 - `src/main.js`: main loop (`frame()`), plus a read-only `window.PALM` hook used by the tests
 - Music: `<audio id="bgm" src="music.mp3">`. Drop `music.mp3` in the repo root. It loops, follows the volume slider, and ducks during the Lurker wait, pause and the game-over slump.
 
