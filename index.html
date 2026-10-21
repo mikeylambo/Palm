@@ -18,6 +18,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);margin:0;d
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;box-sizing:border-box;overflow:hidden;touch-action:manipulation}
 [hidden]{display:none!important}
 #wrap{flex:1;min-height:0;width:100%;display:flex;justify-content:center;align-items:center;position:relative}
+#btn-pause{position:absolute;z-index:4;font-family:var(--display);font-size:22px;width:44px;height:44px;padding:0;background:var(--ink);color:var(--paper);border:2px solid var(--paper);flex:none}
 #menu-links{position:absolute;display:flex;gap:10px;justify-content:center}
 #menu-links button,#panel button{flex:0 0 auto;font-family:var(--display);font-size:20px;letter-spacing:.06em;padding:6px 16px;background:transparent;color:var(--paper);border:2px solid var(--paper)}
 #panel{position:absolute;z-index:5;background:var(--ink);border:3px solid var(--paper);color:var(--paper);font-family:var(--body);display:flex;flex-direction:column;gap:14px;padding:20px;box-sizing:border-box;overflow:auto}
@@ -50,6 +51,7 @@ button:focus-visible{outline:3px solid var(--grace);outline-offset:3px}
 button small{display:block;font-family:var(--body);font-size:11px;letter-spacing:.1em;opacity:.7}
 </style>
 <div id="wrap"><canvas id="c" width="600" height="800" aria-label="PALM game stage"></canvas>
+<button id="btn-pause" type="button" hidden aria-label="Pause">II</button>
 <div id="menu-links" hidden><button id="btn-settings" type="button">SETTINGS</button><button id="btn-credits" type="button">CREDITS</button></div>
 <div id="panel" hidden role="dialog" aria-modal="true"></div>
 <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
@@ -153,7 +155,7 @@ function strike(text,kind='flee'){const alive=OL.filter(o=>!o.gone);if(alive.len
 function act(a){
   const now=performance.now();if(!panelEl.hidden)return;
   if(S.mode==='title'||S.mode==='over'){hideBoard();menuLinks.hidden=true;startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});S={...S,mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0,shift:1};shiftMod=null;lastShift=0;rule=null;ruleLeft=0;seen=new Set();startBeat();return}
-  if(paused){const d=now-pauseAt;t0+=d;if(res)res.t+=d;paused=false;return}
+  if(paused){resume();return}
   if(S.mode==='card'&&card.kind==='intro'&&now-card.t>500){spawn();return}
   if(S.mode==='lurk'&&t0+lurk-now<=80){buffered=a;return}
   if(S.mode==='lurk'){strike('FLINCHED');tone(140,.2,'square',.12);res={a:'flinch',ok:false,t:now,dur:500};S.mode='resolve';S.beat++;return}
@@ -442,7 +444,12 @@ function frame(t){
   if(paused){g.fillStyle='rgba(17,16,20,.8)';g.fillRect(0,0,600,800);txt('PAUSED',300,400,90,C.paper);g.font='18px "Zen Kaku Gothic New",sans-serif';g.textAlign='center';g.fillStyle=C.grace;g.fillText('Press any button to resume',300,450)}
   g.restore();requestAnimationFrame(frame);
 }
-function pause(){if(!paused&&['lurk','beat','resolve'].includes(S.mode)){paused=true;pauseAt=performance.now();buffered=null}}
+function pause(){if(!paused&&['lurk','beat','resolve','card'].includes(S.mode)){paused=true;pauseAt=performance.now();buffered=null}}
+function resume(){if(!paused)return;const d=performance.now()-pauseAt;t0+=d;if(res)res.t+=d;if(card)card.t+=d;paused=false}
+const pauseBtn=document.getElementById('btn-pause');
+pauseBtn.onclick=()=>{paused?resume():pause();pauseBtn.blur()};
+addEventListener('keydown',e=>{if((e.key==='Escape'||e.key==='p'||e.key==='P')&&panelEl.hidden&&e.target.tagName!=='INPUT'){e.preventDefault();paused?resume():pause()}});
+setInterval(()=>{const playing=['lurk','beat','resolve','card'].includes(S.mode);pauseBtn.hidden=!playing;if(playing){const w=document.getElementById('wrap').getBoundingClientRect(),c=cv.getBoundingClientRect();pauseBtn.style.left=(c.right-w.left-54)+'px';pauseBtn.style.top=(c.top-w.top+10)+'px';pauseBtn.textContent=paused?'\u25B6':'II'}},150);
 addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 document.getElementById('blast').onclick=()=>act('blast');
 document.getElementById('pass').onclick=()=>act('pass');
@@ -483,8 +490,9 @@ let sbOk=false,myEntry=null;
 async function sbTop(){try{const r=await fetch(SB_REST+'?select=name,score,stage&game=eq.palm&order=score.desc&limit=10',{headers:SB_H});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function sbRefresh(){const rows=await sbTop();sbOk=!!rows;if(rows){board=rows.map((r,i)=>({id:myEntry&&r.name===myEntry.name&&r.score===myEntry.score?'mine':'sb'+i,name:r.name,score:r.score}));if(myEntry)myDoc='mine'}if(!lbEl.hidden){lbForm.hidden=!(sbOk&&runScore>0&&!postedRun);if(!lbDb)lbMsg.textContent=!sbOk?'Leaderboard unreachable right now.':postedRun?'Posted.':runScore>0?'':'Score something to get on the board.';renderBoard()}}
 try{lbName.value=localStorage.getItem('palm_name')||''}catch(e){}
-function placeBoard(){const w=document.getElementById('wrap').getBoundingClientRect(),c=cv.getBoundingClientRect(),k=c.height/800;
-  lbEl.style.left=(c.left-w.left+c.width*.09)+'px';lbEl.style.width=(c.width*.82)+'px';lbEl.style.top=(c.top-w.top+215*k)+'px';lbEl.style.maxHeight=(455*k)+'px';lbEl.style.overflow='hidden'}
+function placeBoard(){const w=document.getElementById('wrap').getBoundingClientRect(),c=cv.getBoundingClientRect(),k=c.width/600;
+  // laid out at the canvas's own 600px scale, then scaled with it, so it lines up on every screen
+  lbEl.style.left=(c.left-w.left+54*k)+'px';lbEl.style.top=(c.top-w.top+215*k)+'px';lbEl.style.width='492px';lbEl.style.maxHeight='450px';lbEl.style.overflow='hidden';lbEl.style.transformOrigin='0 0';lbEl.style.transform='scale('+k+')'}
 function renderBoard(){lbList.textContent='';
   if(!board.length){const li=document.createElement('li');li.textContent=(lbDb||sbOk)?'No scores yet. Be the first.':'';lbList.appendChild(li);return}
   board.forEach((r,i)=>{const li=document.createElement('li');if(r.id===myDoc)li.className='me';
