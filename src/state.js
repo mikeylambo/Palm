@@ -4,16 +4,16 @@ export const TOP=[[175,60],[580,40],[580,440],[205,480]], BOT=[[250,520],[580,47
 export const ROSTER={
   wanderer:{name:'WANDERER',tip:'Read the aura, then the eyes.',at:0},
   lurker:{name:'LURKER',tip:'A shadow that sometimes never comes. Do not flinch.',at:10},
-  sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Acting first is a strike.',at:16},
-  herald:{name:'HERALD',tip:'Carries a sealed scroll. Always let a Herald pass, whatever its aura.',at:23},
-  twins:{name:'TWINS',tip:'Two faces, one verdict. Blast if either one is a threat.',at:29},
-  turncoat:{name:'TURNCOAT',tip:'Smiles at first. Wait: some turn. Strike too early and you strike an innocent.',at:35},
-  child:{name:'THE CHILD',tip:'Scary aura, screaming crowd. Always let the Child pass. The crowd is wrong.',at:40},
+  sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Move first and you flinch.',at:16},
+  twins:{name:'TWINS',tip:'Two faces, one verdict. Blast if either one is a threat.',at:23},
+  turncoat:{name:'TURNCOAT',tip:'Smiles at first. Some turn. Move before the turn and you flinch.',at:30},
+  dancer:{name:'THE DANCER',tip:'A festival dancer in a demon mask. The crowd screams. It is a costume: always let the Dancer pass.',at:37},
 };
 export const S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
 try{S.best=+localStorage.getItem('palm_best')||0}catch(e){}
-// fig: current arrival. t0/lurk/win: beat timing (ms). res: last verdict being animated. card: intro/rule card.
-export const G={fig:null,t0:0,win:2200,lurk:0,res:null,card:null,shake:0,rule:null,ruleLeft:0,force:null,
+// fig: current arrival. t0/lurk/win: beat timing (ms). res: last verdict being animated. card: intro card.
+// learnType/learnLeft: the newest type and how many arrivals of its learn stretch are left.
+export const G={fig:null,t0:0,win:2200,lurk:0,res:null,card:null,shake:0,force:null,learnType:null,learnLeft:0,
   boil:0,boilT:0,paused:false,pauseAt:0,buffered:null,missT:-9999,missSeed:0,fallT:0,lastClassic:false,
   stopUntil:0,killer:null}; // stopUntil: hit-stop end time. killer: the arrival behind the run-ending mistake
 export const seen=new Set();

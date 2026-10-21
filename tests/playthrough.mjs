@@ -8,7 +8,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const TYPES=['wanderer','lurker','sleeper','herald','twins','turncoat','child'];
+const TYPES=['wanderer','lurker','sleeper','twins','turncoat','dancer'];
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css'};
 const server=http.createServer(async(req,res)=>{
   const rel=decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/,'/index.html');
@@ -53,7 +53,7 @@ const run=await page.evaluate(TYPES=>{
     if(S.mode==='beat'&&fig&&acted!==fig){const k=(now-G.t0-G.lurk)/G.win;
       const wait=fig.type==='sleeper'?fig.openAt+.05:fig.type==='turncoat'?fig.turnAt+.05:.1;
       if(fig.empty)continue; // an empty lurk resolves itself
-      if(k>wait){acted=fig;const a=G.rule==='ALL'?'blast':G.rule==='NONE'?'pass':fig.threat?'blast':'pass';key(a==='blast'?' ':'ArrowLeft')}}
+      if(k>wait){acted=fig;const a=fig.threat?'blast':'pass';key(a==='blast'?' ':'ArrowLeft')}}
   }
   return {seen:[...seen],intros,debutBeforeIntro,beat:P.S.beat,strikes:P.S.strikes,mode:P.S.mode};
 },TYPES);

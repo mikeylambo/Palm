@@ -11,15 +11,17 @@ PALM is a WarioWare-paced reaction game. A masked, robed guardian holds up a pal
 The game got better every time something was cut. Treat these as hard constraints:
 
 - **Less is more.** Do not add new characters, rule types, cards, banners, text, shifts, daily runs, unlocks or cosmetics unless asked.
-- **On-screen words during play:** only `BLASTED`, `PASSED`, `FLINCHED` (big, centered) and the rule cards `LET NOTHING PASS` / `MERCY: PASS EVERYONE`. No other feedback text.
-- **Speed is v1 speed:** reaction window starts at 2.2 s and drops 55 ms per beat to a 0.9 s floor; past beat 40 it tightens slowly toward 0.6 s.
-- **Regular arrivals pop in instantly.** Only the Lurker makes you wait (shadow, variable delay).
+- **On-screen words during play:** only `BLASTED`, `PASSED`, `FLINCHED` (big, centered). FLINCHED = any move made too early: at a shadow, at empty air, at shut eyes, before a turn. No other feedback text.
+- **The clock holds:** reaction window warms up from 2.2 s (−55 ms per beat) and then stays at 1.2 s. No steady speed-up; tension comes from the characters' timing (shadow waits, naps, late turns, the crowd's scream).
+- **Arrivals pop in instantly,** except the Lurker and, once the Lurker is known, a growing share of anyone you've met (up to 35%), who come out of the shadow. Only the Lurker can turn out to be nothing.
 - **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size.
-- **The blast is a Hakai, not a ki blast:** instant, no charge, no beam. Impact frame (invert), violet flash, whiteout, palm thrust, deep boom. The blasted face does one of three things, 33/33/33: fling, crumble into ink flakes, or simply get covered by the white. Every blast holds the impact frame for 75 ms (hit-stop, `HITSTOP` in `game.js`); correct reads also get an 85 ms beat before it.
+- **The blast is a Hakai, not a ki blast:** instant, no charge, no beam. Violet flash (no screen invert), whiteout, palm thrust, deep boom. The blasted face does one of three things, 33/33/33: fling, crumble into ink flakes, or simply get covered by the white. Every blast holds its first frame for 75 ms (hit-stop, `HITSTOP` in `game.js`); correct reads also get an 85 ms beat before it.
 - **Aura is the first read** (red = threat, gold = friend), eyes second (slit pupils = threat). Disguises appear later.
-- Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button` (no Best line). No corner rule label during rule beats; the card says it once.
+- Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button` (no Best line).
 - **The face that ended your run** fades back into the top panel, still and with no caption, while the guardian slumps, and stays faintly behind GAME OVER. A blast at thin air leaves the panel empty.
-- Rule moments end silently; no "back to normal" card.
+- No rule moments: `LET NOTHING PASS` / `MERCY` were cut.
+- **Kind tone:** nobody you should spare is a child or crying. The "crowd is wrong" character is a festival dancer in a demon mask.
+- **Music target: about 174 BPM.** The game is not beat-synced; the track loops underneath.
 
 ## Roster (unlock beat)
 
@@ -27,13 +29,12 @@ The game got better every time something was cut. Treat these as hard constraint
 | --- | --- | --- |
 | Wanderer | 0 | Read aura, then eyes |
 | Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = FLINCHED |
-| Sleeper | 16 | Eyes shut 0.15–2.3 s. Acting before they open is a strike |
-| Herald | 23 | Carries a sealed scroll. Always pass |
-| Twins | 29 | Two faces. Blast if either is a threat |
-| Turncoat | 35 | Smiles, some turn mid-beat. Blasting before the turn is a strike |
-| Child | 40 | Red aura, crowd screams. Always pass |
+| Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = FLINCHED |
+| Twins | 23 | Two faces. Blast if either is a threat |
+| Turncoat | 30 | Smiles, some turn 20–75% into the beat. Moving before the turn = FLINCHED |
+| Dancer | 37 | Festival dancer, red demon mask (tied on crooked, grin below, paper fan), red aura. The crowd screams, louder and shakier the longer you hold, with a wail. Always pass |
 
-Cut on purpose: Mirror, The Masked. Rotation: each beat draws from the Wanderer plus the two newest specials, so characters do not stack.
+Cut on purpose: Mirror, The Masked, Herald, The Child. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often.
 
 ## Lives and onlookers
 
@@ -62,4 +63,4 @@ Pause note: the owner's report never reproduced headless. The live build had the
 
 ## Remaining
 
-1. Hook up the owner's music: drop `music.mp3` in the repo root (wiring is done).
+1. Hook up the owner's music (about 174 BPM): drop `music.mp3` in the repo root (wiring is done).

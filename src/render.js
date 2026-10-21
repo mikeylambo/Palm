@@ -86,6 +86,20 @@ function face(L,o){ // parametric head: o={slit,smile,turned,closed,big,react}
   g.restore();
 }
 function collar(){g.fillStyle=C.dim;g.beginPath();g.moveTo(-70,70);g.lineTo(0,58);g.lineTo(70,70);g.lineTo(90,130);g.lineTo(-90,130);g.closePath();g.fill();g.lineWidth=3;g.strokeStyle=C.ink;g.stroke()}
+// the Dancer: a red festival demon mask, tied on a little crooked, a grin showing below it, a paper fan
+function oniMask(L,T,react){const w=L.w,h=L.h;g.save();g.lineWidth=3;g.strokeStyle=C.ink;g.lineJoin='round';
+  g.beginPath();g.moveTo(-w*1.02,-h*.35);g.lineTo(-w*1.25,-h*.2);g.moveTo(w*1.02,-h*.35);g.lineTo(w*1.25,-h*.25);g.stroke(); // the string
+  g.rotate(react==='panic'?.5:-.08+Math.sin(T/260)*.03);
+  g.fillStyle='#f4ead2';[-1,1].forEach(s2=>{g.beginPath();g.moveTo(s2*w*.35,-h*.82);g.quadraticCurveTo(s2*w*.55,-h*1.3,s2*w*.3,-h*1.55);g.quadraticCurveTo(s2*w*.2,-h*1.15,s2*w*.12,-h*.88);g.closePath();g.fill();g.stroke()});
+  g.fillStyle=C.threat;g.beginPath();g.ellipse(0,-h*.28,w*1.08,h*.64,0,0,7);g.fill();g.lineWidth=4;g.stroke();
+  g.lineWidth=6;g.beginPath();[-1,1].forEach(s2=>{g.moveTo(s2*w*.78,-h*.62);g.lineTo(s2*w*.12,-h*.38)});g.stroke();
+  g.lineWidth=3;[-1,1].forEach(s2=>{g.fillStyle=C.grace;g.beginPath();g.ellipse(s2*w*.42,-h*.24,w*.2,h*.11,s2*.25,0,7);g.fill();g.stroke();g.fillStyle=C.ink;g.beginPath();g.arc(s2*w*.42,-h*.24,4,0,7);g.fill()});
+  g.fillStyle='#fff';g.beginPath();g.moveTo(-w*.55,h*.08);g.quadraticCurveTo(0,h*.3,w*.55,h*.08);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#fff';[-1,1].forEach(s2=>{g.beginPath();g.moveTo(s2*w*.42,h*.1);g.lineTo(s2*w*.32,h*.3);g.lineTo(s2*w*.24,h*.14);g.closePath();g.fill();g.stroke()});
+  g.restore();
+  // fan, bobbing to the festival
+  g.save();g.translate(w*1.35,h*.7);g.rotate(Math.sin(T/180)*.35);g.lineWidth=3;g.strokeStyle=C.ink;g.beginPath();g.moveTo(0,0);g.lineTo(0,-34);g.stroke();
+  g.fillStyle='#fff';g.beginPath();g.arc(0,-56,24,0,7);g.fill();g.stroke();g.fillStyle=C.threat;g.beginPath();g.arc(0,-56,9,0,7);g.fill();g.restore()}
 function drawFig(f,cx,cy,sc,k){
   const turned=f.type==='turncoat'&&f.threat&&k>=f.turnAt;
   const closed=f.type==='sleeper'&&k<f.openAt;
@@ -97,10 +111,9 @@ function drawFig(f,cx,cy,sc,k){
     f.pair.forEach((p,i)=>{g.save();g.translate(i?70:-70,i?18:-8);g.scale(.72,.72);collar();face(p.look,{slit:p.slit,smile:p.smile,react});g.restore()});
     g.restore();return;
   }
-  if(f.type==='child'){g.translate(0,40);g.scale(.8,.8)}
   collar();
-  face(f.look,{slit:turned||f.slit,smile:turned?false:f.smile,turned,closed:closed&&react!=='panic',big:f.type==='child',react});
-  if(f.type==='herald'){g.lineWidth=3;g.strokeStyle=C.ink;g.fillStyle='#fffbe8';g.fillRect(40,60,70,46);g.strokeRect(40,60,70,46);g.fillStyle=C.threat;g.beginPath();g.arc(75,83,11,0,7);g.fill();g.stroke();g.lineWidth=1.5;for(let i=0;i<3;i++){g.beginPath();g.moveTo(48,68+i*12);g.lineTo(62,68+i*12);g.stroke()}}
+  face(f.look,{slit:turned||f.slit,smile:turned?false:f.smile,turned,closed:closed&&react!=='panic',react});
+  if(f.type==='dancer')oniMask(f.look,T,react);
   g.restore();
 }
 function drawShadow(t,p){
@@ -132,6 +145,7 @@ function drawGuardian(push,slump=0){
   g.restore();
   });
 }
+let scream=0; // 0..1: how long the crowd has been screaming at the Dancer
 function drawOnlookers(state){
   // the three onlookers ARE your lives. A threat let through knocks one out; any other mistake makes one flee.
   g.save();poly(BOT,20);g.fillStyle='#f6f2ea';g.fill();g.clip();
@@ -143,6 +157,7 @@ function drawOnlookers(state){
     g.save();
     const e=o.gone?(o.kind==='ko'?'ko':'flee'):state;
     if(e==='fear'||e==='horror'||e==='flee')g.translate((Math.random()-.5)*4,(Math.random()-.5)*4);
+    if(e==='scream'){const z=4+scream*16;g.translate((Math.random()-.5)*z,(Math.random()-.5)*z-scream*26);g.strokeStyle=C.ink;g.lineWidth=2.5;for(let i=0;i<7;i++){const a=-Math.PI*.95+i*Math.PI*.15,r0=r*1.25,r1=r0+14+scream*26+j(i+n*9)*8;g.beginPath();g.moveTo(x+Math.cos(a)*r0,y+Math.sin(a)*r0);g.lineTo(x+Math.cos(a)*r1,y+Math.sin(a)*r1);g.stroke()}}
     if(o.gone&&o.kind==='ko'){g.translate(x+q*220,y-q*260+q*q*120);g.rotate(q*9);g.translate(-x,-y)}
     if(o.gone&&o.kind==='flee'){g.translate(q*q*320,-q*30)}
     g.strokeStyle=C.ink;g.lineWidth=3;g.fillStyle='#fff';g.beginPath();g.arc(x,y,r,0,7);g.fill();g.stroke();
@@ -153,6 +168,8 @@ function drawOnlookers(state){
     g.lineWidth=3;
     if(e==='ko'){[-1,1].forEach(s2=>{const ex=x+s2*r*.35,ey=y-4;g.beginPath();g.moveTo(ex-6,ey-6);g.lineTo(ex+6,ey+6);g.moveTo(ex+6,ey-6);g.lineTo(ex-6,ey+6);g.stroke()});g.beginPath();g.ellipse(x,y+r*.4,6,10,0,0,7);g.stroke();
       g.fillStyle=C.grace;for(let i=0;i<3;i++){const a=T/120+i*2.1;g.font='bold 18px sans-serif';g.fillText('★',x+Math.cos(a)*r*1.1-6,y-r*1.1+Math.sin(a)*8)}}
+    else if(e==='scream'){[-1,1].forEach(s2=>{g.fillStyle='#fff';g.beginPath();g.arc(x+s2*r*.35,y-8,11,0,7);g.fill();g.stroke();g.fillStyle=C.ink;g.beginPath();g.arc(x+s2*r*.35,y-8,2.5,0,7);g.fill()});
+      g.fillStyle=C.ink;g.beginPath();g.ellipse(x,y+r*.4,13+scream*5,16+scream*12,0,0,7);g.fill();g.fillStyle='#e8627a';g.beginPath();g.ellipse(x,y+r*.4+8+scream*8,7,4,0,0,7);g.fill()}
     else if(e==='fear'||e==='horror'||e==='flee'){[-1,1].forEach(s2=>{g.fillStyle='#fff';g.beginPath();g.arc(x+s2*r*.35,y-5,10,0,7);g.fill();g.stroke();g.fillStyle=C.ink;g.beginPath();g.arc(x+s2*r*.35,y-5,3,0,7);g.fill()});
       g.fillStyle=C.ink;g.beginPath();g.ellipse(x,y+r*.42,12,e==='fear'?11:19,0,0,7);g.fill();
       g.fillStyle='#7fb6e8';g.beginPath();g.ellipse(x+r*.8,y-r*.4,5,9,0,0,7);g.fill();g.beginPath();g.ellipse(x-r*.85,y-r*.25,4,7,0,0,7);g.fill();
@@ -183,7 +200,7 @@ export function draw(t){
   const end=S.mode==='fall'||S.mode==='over';
   if(end&&G.killer){drawKiller(t);onl='calm'}
   else if(S.mode==='lurk'){drawShadow(t,Math.min(1,(t-t0)/lurk));onl='tense'}
-  else if(fig&&(S.mode==='beat'||S.mode==='resolve')&&res?.a!=='flinch'||S.mode==='beat'){
+  else if(fig&&(S.mode==='beat'||S.mode==='resolve')&&!res?.lurk||S.mode==='beat'){
     const f=fig;
     if(f.empty){drawShadow(t,Math.max(0,1-k*2));onl='tense'}
     else if(S.mode==='resolve'&&res.a!=='blast'){
@@ -193,7 +210,7 @@ export function draw(t){
     }else{
       const p=S.mode==='beat'?Math.min(1,(t-t0-lurk)/150):1;
       drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else if(res&&res.fx==='crumble'){g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}else drawFig(f,420,230,(.6+.35*p),k);});g.restore();
-      onl=f.type==='child'?'fear':(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
+      scream=Math.max(0,Math.min(1,k));onl=f.type==='dancer'?'scream':(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
       if(S.mode==='resolve')onl=f.threat?'joy':'horror';
     }
   }else{g.save();poly(TOP);g.clip();g.strokeStyle='#c9c6b8';g.lineWidth=1;for(let i=0;i<30;i++){g.beginPath();g.moveTo(180+i*15,40);g.lineTo(160+i*15,480);g.stroke()}g.restore()}
@@ -213,20 +230,19 @@ export function draw(t){
   txt('×'+S.combo,20,78,26,C.violet,'left');
   if(S.mode==='resolve'&&res.a==='blast'){
     // hakai: instant. the face crumbles into ink flakes that drift up and dissolve into the white
-    const q=(t-res.t)/res.dur,imp=SET.flashes&&q>=0&&q<.07;
-    if(q>=0&&q<.15&&!imp){g.fillStyle=C.violet;g.globalAlpha=.5;poly(TOP);g.fill();g.globalAlpha=1}
+    const q=(t-res.t)/res.dur;
+    if(q>=0&&q<.15){g.fillStyle=C.violet;g.globalAlpha=.5;poly(TOP);g.fill();g.globalAlpha=1}
     if(res.fx==='crumble'&&q>=.03&&q<.75){const cq=(q-.03)/.72;g.save();poly(TOP);g.clip();
       res.shards.forEach(sh=>{const a=Math.max(0,1-cq*1.3);if(!a)return;g.globalAlpha=a;g.save();g.translate(420+sh.x+cq*sh.v*60,230+sh.y-cq*sh.v*170);g.rotate(sh.r+cq*sh.v*3);const z=sh.s*(1-cq*.6);g.fillStyle=sh.ink?C.ink:'#fff';g.strokeStyle=C.ink;g.lineWidth=1.5;g.beginPath();g.moveTo(-z,-z*.4);g.lineTo(z*.7,-z*.8);g.lineTo(z,z*.5);g.lineTo(-z*.2,z*.7);g.closePath();g.fill();if(!sh.ink)g.stroke();g.restore()});
       g.restore();g.globalAlpha=1}
     let a=q<.15?Math.max(0,q)/.15:q<.55?1:Math.max(0,1-(q-.55)/.45);if(!SET.flashes)a*=.55;
-    if(!imp){g.fillStyle=`rgba(255,255,255,${a*.85})`;g.fillRect(-20,-20,640,840)}else{g.save();g.globalCompositeOperation='difference';g.fillStyle='#fff';g.fillRect(-20,-20,640,840);g.restore()}
+    g.fillStyle=`rgba(255,255,255,${a*.85})`;g.fillRect(-20,-20,640,840);
     if(q>.2&&q<.7)txt('BLASTED',300,420,90,C.violet);
   }
   if(S.mode==='resolve'&&res.a==='pass'&&(t-res.t)<550)txt('PASSED',300,420,90,C.dim);
   if(S.mode==='resolve'&&res.a==='flinch'&&(t-res.t)<500)txt('FLINCHED',300,420,90,C.threat);
   if(S.mode==='card'){
-    if(card.kind==='rule'){g.fillStyle=C.ink;g.fillRect(0,330,600,140);txt(card.txt,300,420,58,C.paper)}
-    else{const r=ROSTER[card.type];g.fillStyle='rgba(17,16,20,.86)';g.fillRect(0,250,600,300);
+    {const r=ROSTER[card.type];g.fillStyle='rgba(17,16,20,.86)';g.fillRect(0,250,600,300);
       txt('NEW ARRIVAL',300,300,28,C.grace);txt(r.name,300,370,72,C.paper);g.fillStyle=C.paper;wrapText(r.tip,300,420,480,28);
       g.font='16px "Zen Kaku Gothic New",sans-serif';g.fillStyle=C.grace;g.fillText('Press any button',300,525)}
   }
