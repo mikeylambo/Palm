@@ -97,7 +97,7 @@ function pickType(){const b=S.beat,unlocked=Object.entries(ROSTER).filter(([k,v]
 const R=(a,b)=>a+Math.random()*(b-a),RI=n=>Math.floor(Math.random()*n);
 const SKIN=['#ffffff','#f6ead8','#ead2b4','#d3ad87','#a87a56','#7d5539'];
 let lastClassic=false;
-function newLook(){const useClassic=!lastClassic&&Math.random()<.17;lastClassic=useClassic;if(useClassic)return{classic:true,head:0,w:56,h:66,hair:0,hat:0,nose:0,ears:false,scar:false,freck:false,brow:5,mouth:18,skin:'#ffffff',seed:Math.random()*1000,tilt:0,mg:'none',bg:'none',cg:'none',smug:false,bob:R(2,5),bobs:R(160,240)};return{head:RI(4),w:R(48,62),h:R(56,74),hair:RI(6),hat:Math.random()<.35?1+RI(4):0,nose:RI(3),ears:Math.random()<.6,scar:false,freck:Math.random()<.2,brow:R(3,7),mouth:R(12,22),skin:SKIN[RI(SKIN.length)],seed:Math.random()*1000,tilt:R(-.12,.12),mg:['tongue','none','none','none'][RI(4)],bg:['raised','none','none'][RI(3)],cg:['blush','blush','sweat','none','none'][RI(5)],smug:Math.random()<.5,bob:R(2,7),bobs:R(140,260)}}
+function newLook(){const useClassic=!lastClassic&&Math.random()<.17;lastClassic=useClassic;if(useClassic)return{classic:true,head:0,w:56,h:66,hair:0,hat:0,nose:0,ears:false,scar:false,freck:false,brow:5,mouth:18,skin:'#ffffff',seed:Math.random()*1000,tilt:0,mg:'none',bg:'none',cg:'none',smug:false,bob:R(2,5),bobs:R(160,240)};return{head:RI(4),w:R(48,62),h:R(56,74),hair:RI(6),hat:Math.random()<.35?1+RI(4):0,nose:RI(3),ears:Math.random()<.6,scar:false,freck:Math.random()<.2,brow:R(3,7),mouth:R(12,22),skin:SKIN[RI(SKIN.length)],seed:Math.random()*1000,tilt:R(-.12,.12),mg:'none',bg:['raised','none','none'][RI(3)],cg:['blush','sweat','none','none','none','none'][RI(6)],smug:Math.random()<.5,bob:R(2,7),bobs:R(140,260)}}
 function newFig(){
   const b=S.beat,type=force||pickType();force=null;
   let threat=Math.random()<.5;
@@ -258,9 +258,9 @@ function face(L,o){ // parametric head: o={slit,smile,turned,closed,masked,big}
   if(L.mg==='chatter'||L.mg==='gap'){const jy=L.mg==='chatter'?Math.sin(T/35)*2:0;g.fillStyle='#fff';for(let i=-2;i<=2;i++){if(L.mg==='gap'&&i===1)continue;g.fillRect(i*7-3,ty-3+jy,6,7);g.strokeRect(i*7-3,ty-3+jy,6,7)}}
   if(L.mg==='drool'){const dl2=6+((T/40)%22);g.fillStyle='#9fd1f2';g.beginPath();g.moveTo(mw*.6-3,ty-2);g.lineTo(mw*.6+3,ty-2);g.lineTo(mw*.6+2,ty+dl2);g.arc(mw*.6,ty+dl2,3.5,0,Math.PI);g.closePath();g.fill();g.lineWidth=1.5;g.stroke()}
   }
-  if(L.cg==='blush'&&!pan){g.fillStyle='rgba(240,110,110,.55)';[-1,1].forEach(s2=>{g.beginPath();g.ellipse(s2*(ex+8),ey+24,13,9,0,0,7);g.fill()})}
+  if(L.cg==='blush'&&!pan&&o.smile){g.fillStyle='rgba(240,110,110,.55)';[-1,1].forEach(s2=>{g.beginPath();g.ellipse(s2*(ex+8),ey+24,13,9,0,0,7);g.fill()})}
   if(L.cg==='bubble'&&!pan){const ph=(T%1600)/1600;if(ph<.85){const r=4+ph*20;g.fillStyle='rgba(180,220,255,.6)';g.lineWidth=2;g.beginPath();g.arc(8,ey+26,r,0,7);g.fill();g.stroke();g.strokeStyle='#fff';g.beginPath();g.arc(5,ey+22,r*.4,3.6,4.6);g.stroke();g.strokeStyle=C.ink}else{g.lineWidth=2;for(let i=0;i<6;i++){const a=i*1.05;g.beginPath();g.moveTo(8+Math.cos(a)*14,ey+26+Math.sin(a)*14);g.lineTo(8+Math.cos(a)*22,ey+26+Math.sin(a)*22);g.stroke()}}}
-  if(L.cg==='sweat'||pan){g.fillStyle='#9fd1f2';g.lineWidth=2;g.beginPath();g.moveTo(w*.75,-h*.55);g.quadraticCurveTo(w*1.05,-h*.15,w*.85,-h*.1);g.quadraticCurveTo(w*.6,-h*.15,w*.75,-h*.55);g.fill();g.stroke()}
+  if((L.cg==='sweat'&&!o.smile)||pan){g.fillStyle='#9fd1f2';g.lineWidth=2;g.beginPath();g.moveTo(w*.75,-h*.55);g.quadraticCurveTo(w*1.05,-h*.15,w*.85,-h*.1);g.quadraticCurveTo(w*.6,-h*.15,w*.75,-h*.55);g.fill();g.stroke()}
   if(L.cg==='hair'&&!pan){g.lineWidth=1.5;g.beginPath();g.moveTo(-3,ey+26);g.quadraticCurveTo(-8,ey+34+Math.sin(T/120)*3,-2,ey+40);g.stroke()}
   if(L.scar){g.strokeStyle=C.threat;g.lineWidth=2.5;g.beginPath();g.moveTo(ex-6,ey-24);g.lineTo(ex+10,ey+18);for(let i=0;i<3;i++){g.moveTo(ex-4+i*6,ey-12+i*12);g.lineTo(ex+6+i*6,ey-14+i*12)}g.stroke();g.strokeStyle=C.ink}
   if(L.freck){g.fillStyle='#a5683f';for(let i=0;i<6;i++){g.beginPath();g.arc((i%3-1)*8+(i<3?-ex:ex),ey+16+(i%2)*4,1.6,0,7);g.fill()}}

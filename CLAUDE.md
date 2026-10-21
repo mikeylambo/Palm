@@ -14,7 +14,7 @@ The game got better every time something was cut. Treat these as hard constraint
 - **On-screen words during play:** only `BLASTED`, `PASSED`, `FLINCHED` (big, centered) and the rule cards `LET NOTHING PASS` / `MERCY: PASS EVERYONE`. No other feedback text.
 - **Speed is v1 speed:** reaction window starts at 2.2 s and drops 55 ms per beat to a 0.9 s floor; past beat 40 it tightens slowly toward 0.6 s.
 - **Regular arrivals pop in instantly.** Only the Lurker makes you wait (shadow, variable delay).
-- **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size.
+- **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size. No mouth gags (tongue etc. were removed): the grin vs. the grump does the work. Blush only on grins, sweat only on grumps.
 - **The blast is a Hakai, not a ki blast:** instant, no charge, no beam. Impact frame (invert), violet flash, whiteout, palm thrust, deep boom. The blasted face does one of three things, 33/33/33: fling, crumble into ink flakes, or simply get covered by the white.
 - **Aura is the first read** (red = threat, gold = friend), eyes second (slit pupils = threat). Disguises appear later.
 - Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button`.
