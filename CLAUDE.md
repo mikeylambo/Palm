@@ -11,14 +11,14 @@ PALM is a WarioWare-paced reaction game. A masked, robed guardian holds up a pal
 The game got better every time something was cut. Treat these as hard constraints:
 
 - **Less is more.** Do not add new characters, rule types, cards, banners, text, shifts, daily runs, unlocks or cosmetics unless asked.
-- **On-screen words during play:** only `BLASTED`, `PASSED`, `FLINCHED` (big, centered; FLINCHED = any move made too early: at a shadow, at empty air, at shut eyes, before a turn) and the rule cards `LET NOTHING PASS` / `MERCY: PASS EVERYONE`. No other feedback text.
+- **On-screen words during play:** only `BLASTED`, `PASSED`, `FLINCHED` (big, centered; FLINCHED = any move made too early: at a shadow, at empty air, at shut eyes, before a turn) No other feedback text.
 - **The clock holds:** reaction window warms up from 2.2 s (−55 ms per beat) and then stays at 1.2 s. No steady speed-up; tension comes from the characters' timing (shadow waits, naps, late turns).
 - **Arrivals pop in instantly,** except the Lurker and, once the Lurker is known, a growing share of anyone you've met (up to 35%), who come out of the shadow. Only the Lurker can turn out to be nothing.
 - **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size.
 - **The blast is a Hakai, not a ki blast:** instant, no charge, no beam. Short hitstop, violet flash (no screen invert), whiteout, palm thrust, deep boom. The blasted face does one of three things, 33/33/33: fling, crumble into ink flakes, or simply get covered by the white.
 - **Aura is the first read** (red = threat, gold = friend), eyes second (slit pupils = threat). Disguises appear later.
 - Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button`.
-- Rule moments end silently; no "back to normal" card.
+- No rule moments (`LET NOTHING PASS` / `MERCY` were cut).
 
 ## Roster (unlock beat)
 
@@ -26,13 +26,12 @@ The game got better every time something was cut. Treat these as hard constraint
 | --- | --- | --- |
 | Wanderer | 0 | Read aura, then eyes |
 | Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = FLINCHED |
-| Sleeper | 16 | Eyes shut 0.15–2.3 s. Acting before they open is a strike |
-| Herald | 23 | Carries a sealed scroll. Always pass |
-| Twins | 29 | Two faces. Blast if either is a threat |
-| Turncoat | 35 | Smiles, some turn mid-beat. Blasting before the turn is a strike |
-| Child | 40 | Red aura, crowd screams. Always pass |
+| Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = FLINCHED |
+| Twins | 23 | Two faces. Blast if either is a threat |
+| Turncoat | 30 | Smiles, some turn mid-beat. Moving before the turn = FLINCHED |
+| Child | 37 | Full-size crying kid, red aura. The crowd screams (louder and shakier the longer you hold, plus a wail). Always pass |
 
-Cut on purpose: Mirror, The Masked. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often. Rule cards fire only during a mix stretch, never on a debut.
+Cut on purpose: Mirror, The Masked, Herald. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often.
 
 ## Lives and onlookers
 
@@ -53,7 +52,7 @@ Everything is in `index.html` (canvas game, one inline script). Key areas, in or
 ## Known bugs (fix these first)
 
 1. ~~Characters debut without their intro card.~~ Fixed: `pickType()` never returns an unseen type; debuts go through `debutDue()` / `maybeIntro()`.
-2. **P / Esc don't pause for the owner** in the Vercel build, although automated tests pause fine. Reproduce in a real browser; suspects: focus on a game button, the pause button `setInterval`, or a cached build.
+2. **P / Esc pause** — hardened (capture-phase listener, physical key codes, no auto-repeat toggling, stale focus cleared on new run). Not reproduced headless; confirm in the owner's browser.
 3. **No way back to the title screen.** Add a `TITLE` option on the pause screen and on game over.
 
 ## Wrap-up list
