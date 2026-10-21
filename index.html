@@ -385,7 +385,7 @@ function frame(t){
       onl=f.threat?'horror':'joy';
     }else{
       const p=S.mode==='beat'?Math.min(1,(t-t0-lurk)/150):1;
-      drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else if(res.fx==='crumble'){g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}else drawFig(f,420,230,(.6+.35*p),k);});g.restore();
+      drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else if(res&&res.fx==='crumble'){g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}else drawFig(f,420,230,(.6+.35*p),k);});g.restore();
       const seenFor=t-t0-lurk;
       onl=shiftMod==='NIGHT'?'sleep':f.type==='child'?'fear':(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
       if(S.mode==='resolve')onl=f.threat?'joy':'horror';
