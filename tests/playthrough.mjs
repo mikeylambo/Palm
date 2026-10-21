@@ -87,19 +87,21 @@ const swipes=await page.evaluate(()=>{const P=window.PALM,cv=document.getElement
   swipe(0,0);r.started=P.S.mode!=='title';
   toBeat();swipe(0,0);__step(16);r.tapIgnored=P.S.mode==='beat';
   swipe(120,10);r.right=P.G.res&&P.G.res.a;
-  toBeat();swipe(5,120);r.down=P.G.res&&P.G.res.a;
+  toBeat();r.held=!!(P.G.res&&P.G.res.stopped);swipe(5,120);r.down=P.G.res&&P.G.res.a;
   dispatchEvent(new KeyboardEvent('keydown',{key:'p'}));return r});
 check(swipes.started,'a tap on the stage starts a run');
 check(swipes.tapIgnored,'a tap during a beat does nothing');
 check(swipes.right==='blast','swipe right blasts');
 check(swipes.down==='pass','swipe down lets it pass');
+check(swipes.held,'a blast lands with a hit-stop');
 await page.click('#btn-title');
 
 // 5. lose on purpose: always blast, reach game over, TITLE from there too
 const over=await page.evaluate(()=>{const P=window.PALM,key=k=>dispatchEvent(new KeyboardEvent('keydown',{key:k}));
   for(let f=0;f<20000&&P.S.mode!=='over';f++){__step(1000/60);if(f%20===0)key(P.S.mode==='card'?'ArrowLeft':' ')}
-  return P.S.mode});
-check(over==='over','three mistakes end the run');
+  return {mode:P.S.mode,killer:!!P.G.killer}});
+check(over.mode==='over','three mistakes end the run');
+check(over.killer,'the face that ended the run is kept for the slump');
 check(await page.isVisible('#btn-title'),'TITLE is offered at game over');
 await page.click('#btn-title');
 check(await page.evaluate(()=>PALM.S.mode)==='title','TITLE at game over returns to the title');

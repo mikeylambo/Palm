@@ -27,10 +27,10 @@ export function spawn(){
   G.t0=performance.now();S.mode='lurk';
 }
 // a mistake: one onlooker leaves ('ko' = knocked out by a threat let through, 'flee' = anything else)
-function strike(kind='flee'){const alive=OL.filter(o=>!o.gone);if(alive.length){const o=alive[RI(alive.length)];o.gone=performance.now();o.kind=kind}S.strikes++;S.combo=1;G.shake=16;buzz([50,40,50]);G.missT=performance.now();G.missSeed=Math.random()*100;tone(70,.4,'square',.18,45)}
+function strike(kind='flee'){const alive=OL.filter(o=>!o.gone);if(alive.length){const o=alive[RI(alive.length)];o.gone=performance.now();o.kind=kind}S.strikes++;if(S.strikes===3)G.killer=G.fig&&!G.fig.empty?G.fig:null;S.combo=1;G.shake=16;buzz([50,40,50]);G.missT=performance.now();G.missSeed=Math.random()*100;tone(70,.4,'square',.18,45)}
 export function act(a){
   const now=performance.now();if(panelOpen())return;
-  if(S.mode==='title'||S.mode==='over'){hideBoard();hideMenu();startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0});G.rule=null;G.ruleLeft=0;seen.clear();startBeat();return}
+  if(S.mode==='title'||S.mode==='over'){hideBoard();hideMenu();startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0});G.killer=null;G.rule=null;G.ruleLeft=0;seen.clear();startBeat();return}
   if(G.paused){resume();return}
   const fig=G.fig;
   if(S.mode==='card'&&G.card.kind==='intro'&&now-G.card.t>500){spawn();return}
@@ -48,8 +48,10 @@ export function act(a){
   if(a==='blast'){res.fx=['fling','crumble','cover'][Math.floor(Math.random()*3)];res.shards=Array.from({length:26},()=>({x:(Math.random()-.5)*110,y:(Math.random()-.5)*130,v:.5+Math.random(),s:3+Math.random()*7,r:Math.random()*6,ink:Math.random()<.6}));setTimeout(kiBoom,Math.max(0,res.t-now))}S.mode='resolve';S.beat++;
 }
 // per-frame game logic (skipped while paused)
+export const HITSTOP=75;
 export function update(t){
   const fig=G.fig;
+  if(S.mode==='resolve'&&G.res.a==='blast'&&!G.res.stopped&&t>=G.res.t){G.res.stopped=true;G.stopUntil=t+HITSTOP}
   if(S.mode==='lurk'&&t-G.t0>G.lurk){S.mode='beat';if(G.buffered){const b=G.buffered;G.buffered=null;act(b)}}
   if(S.mode==='beat'){const k=(t-G.t0-G.lurk)/G.win;
     if(fig.type==='sleeper'&&!fig.woke&&k>=fig.openAt){fig.woke=true;G.shake=4}
@@ -63,4 +65,4 @@ export function update(t){
 export const playing=()=>['lurk','beat','resolve','card'].includes(S.mode);
 export function pause(){if(!G.paused&&playing()){G.paused=true;G.pauseAt=performance.now();G.buffered=null;showMenu()}}
 export function resume(){if(!G.paused)return;const d=performance.now()-G.pauseAt;G.t0+=d;if(G.res)G.res.t+=d;if(G.card)G.card.t+=d;G.paused=false;hideMenu()}
-export function goTitle(){G.paused=false;G.buffered=null;hideBoard();G.fig=null;G.res=null;G.card=null;G.rule=null;G.ruleLeft=0;G.shake=0;G.missT=-9999;OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'title',score:0,combo:1,strikes:0,beat:0,heat:0});showMenu()}
+export function goTitle(){G.paused=false;G.buffered=null;hideBoard();G.fig=null;G.res=null;G.card=null;G.rule=null;G.ruleLeft=0;G.shake=0;G.missT=-9999;G.killer=null;OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'title',score:0,combo:1,strikes:0,beat:0,heat:0});showMenu()}

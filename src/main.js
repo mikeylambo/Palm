@@ -6,10 +6,12 @@ import './ui.js';
 import './leaderboard.js';
 
 function frame(t){
+  requestAnimationFrame(frame);
+  if(t<G.stopUntil)return; // hit-stop: the impact frame holds, then time picks up where it froze
   if(t-G.boilT>120){G.boil++;G.boilT=t}
   if(!G.paused)update(t);
   draw(t);
-  requestAnimationFrame(frame);
+  if(G.stopUntil>t){const d=G.stopUntil-t;G.res.t+=d;G.t0+=d}
 }
 requestAnimationFrame(frame);
 // read-only hook for the headless tests

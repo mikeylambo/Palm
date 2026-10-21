@@ -168,6 +168,10 @@ function drawOnlookers(state){
 function txt(s,x,y,size,col=C.ink,align='center',font='Bangers'){g.font=`${size}px ${font},Impact,sans-serif`;g.textAlign=align;const light=col===C.paper||col===C.grace;g.lineWidth=Math.max(3,size/(light?9:7));g.strokeStyle=light?C.ink:C.paper;g.lineJoin='round';g.strokeText(s,x,y);g.fillStyle=col;g.fillText(s,x,y)}
 function wrapText(s,x,y,w,lh){g.font='20px "Zen Kaku Gothic New",sans-serif';g.textAlign='center';const words=s.split(' ');let line='',yy=y;for(const wd of words){const tl=line?line+' '+wd:wd;if(g.measureText(tl).width>w){g.fillText(line,x,yy);line=wd;yy+=lh}else line=tl}g.fillText(line,x,yy)}
 
+// the arrival that ended the run: still, eyes open, already turned. It fades back in as the guardian slumps.
+function drawKiller(t){const f=G.killer,a=Math.min(1,(t-G.fallT)/400);
+  drawAura(420,230,f.aura,t,a);g.save();g.globalAlpha=a;poly(TOP);g.clip();
+  layer(1,()=>drawFig({...f,react:null,look:{...f.look,bob:0}},420,230,.95,1));g.restore()}
 export function draw(t){
   const fig=G.fig,res=G.res,card=G.card,t0=G.t0,lurk=G.lurk,win=G.win;
   g.save();if(G.shake>0&&!SET.shake)G.shake=0;if(G.shake>0){g.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);G.shake*=.85;if(G.shake<.5)G.shake=0}
@@ -176,7 +180,9 @@ export function draw(t){
   let onl='calm';
   const k=fig?(t-t0-lurk)/win:0;
   if(fig)fig.react=S.mode==='resolve'?(res.a==='blast'?'panic':res.a==='pass'?'wave':null):null;
-  if(S.mode==='lurk'){drawShadow(t,Math.min(1,(t-t0)/lurk));onl='tense'}
+  const end=S.mode==='fall'||S.mode==='over';
+  if(end&&G.killer){drawKiller(t);onl='calm'}
+  else if(S.mode==='lurk'){drawShadow(t,Math.min(1,(t-t0)/lurk));onl='tense'}
   else if(fig&&(S.mode==='beat'||S.mode==='resolve')&&res?.a!=='flinch'||S.mode==='beat'){
     const f=fig;
     if(f.empty){drawShadow(t,Math.max(0,1-k*2));onl='tense'}
@@ -205,7 +211,6 @@ export function draw(t){
   if(S.mode==='beat'&&!fig.empty){const tk=Math.max(0,1-k);g.fillStyle=C.ink;g.fillRect(0,786,600,14);g.fillStyle=tk<.3?C.threat:C.violet;g.fillRect(0,788,600*tk,10)}
   txt(String(S.score).padStart(6,'0'),20,44,38,C.ink,'left');
   txt('×'+S.combo,20,78,26,C.violet,'left');
-  if(G.rule&&S.mode!=='card')txt(G.rule==='ALL'?'LET NOTHING PASS':'MERCY',390,30,22,C.violet);
   if(S.mode==='resolve'&&res.a==='blast'){
     // hakai: instant. the face crumbles into ink flakes that drift up and dissolve into the white
     const q=(t-res.t)/res.dur,imp=SET.flashes&&q>=0&&q<.07;
@@ -233,7 +238,6 @@ export function draw(t){
     const lines=S.mode==='over'?[]:
       ['Blast it, or let it pass.','','Press any button'];
     lines.forEach((l,i)=>g.fillText(l,300,330+i*34));
-    if(S.best&&S.mode==='title')g.fillText(`Best ${S.best}`,300,330+lines.length*34+20);
   }
   if(G.paused){g.fillStyle='rgba(17,16,20,.8)';g.fillRect(0,0,600,800);txt('PAUSED',300,400,90,C.paper);g.font='18px "Zen Kaku Gothic New",sans-serif';g.textAlign='center';g.fillStyle=C.grace;g.fillText('Press any button to resume',300,450)}
   g.restore();

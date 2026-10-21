@@ -14,7 +14,8 @@ export const S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
 try{S.best=+localStorage.getItem('palm_best')||0}catch(e){}
 // fig: current arrival. t0/lurk/win: beat timing (ms). res: last verdict being animated. card: intro/rule card.
 export const G={fig:null,t0:0,win:2200,lurk:0,res:null,card:null,shake:0,rule:null,ruleLeft:0,force:null,
-  boil:0,boilT:0,paused:false,pauseAt:0,buffered:null,missT:-9999,missSeed:0,fallT:0,lastClassic:false};
+  boil:0,boilT:0,paused:false,pauseAt:0,buffered:null,missT:-9999,missSeed:0,fallT:0,lastClassic:false,
+  stopUntil:0,killer:null}; // stopUntil: hit-stop end time. killer: the arrival behind the run-ending mistake
 export const seen=new Set();
 // the three onlookers are the lives
 export const OL=[{},{},{}].map(()=>({gone:0,kind:''}));
