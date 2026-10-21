@@ -25,8 +25,9 @@ function dress(L,smile){if(L.classic)return;const mood=smile?'grin':'grump';L.mg
 export function newFig(){
   const b=S.beat,type=G.force||pickType();G.force=null;
   let threat=Math.random()<.5;
-  // disguises: quick climb while the roster arrives, then a slow one to a coin flip (50%) by beat 52
-  const disguise=b>=10&&Math.random()<ramp(b,[[10,.08],[16,.32],[52,.5]]);
+  // disguises: never in a learn stretch (a debut teaches one new thing), first after the Lurker's;
+  // quick climb, then a slow one to a coin flip (50%) by beat 52
+  const disguise=b>=14&&!(G.learnLeft>0)&&Math.random()<ramp(b,[[14,.08],[20,.32],[52,.5]]);
   const f={type,threat,look:newLook(),empty:false,turnAt:0,turned:false,openAt:0};
   if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.grace;f.slit=false;f.smile=true;f.turnAt=.2+Math.random()*.55}
   else if(type==='lurker'){f.empty=Math.random()<.35;f.aura=threat?C.threat:C.grace;f.slit=threat;f.smile=!threat;if(f.empty)f.threat=false}
