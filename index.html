@@ -166,7 +166,7 @@ function act(a){
   else strike(want==='early'?(fig.type==='sleeper'?'WOKE IT EARLY':a==='blast'?'STRUCK AN INNOCENT':'TOO EARLY'):fig.type==='child'&&a==='blast'?'YOU BLASTED A CHILD':a==='blast'?'STRUCK A FRIEND':'IT GOT THROUGH',a==='pass'?'ko':'flee');
   if(a==='blast'){S.heat=Math.min(1,S.heat+.25);}else{S.heat=Math.max(0,S.heat-.2);tone(300,.25,'sine',.14,200)}
   const good=fig.empty?a!=='blast':ok;res={a,ok:good,t:now+(good?85:0),dur:a==='blast'?450+S.heat*350:650};
-  if(a==='blast'){res.fx=Math.random()<.5?'fling':'crumble';res.shards=Array.from({length:26},()=>({x:(Math.random()-.5)*110,y:(Math.random()-.5)*130,v:.5+Math.random(),s:3+Math.random()*7,r:Math.random()*6,ink:Math.random()<.6}));setTimeout(kiBoom,Math.max(0,res.t-now))}S.mode='resolve';S.beat++;
+  if(a==='blast'){res.fx=['fling','crumble','cover'][Math.floor(Math.random()*3)];res.shards=Array.from({length:26},()=>({x:(Math.random()-.5)*110,y:(Math.random()-.5)*130,v:.5+Math.random(),s:3+Math.random()*7,r:Math.random()*6,ink:Math.random()<.6}));setTimeout(kiBoom,Math.max(0,res.t-now))}S.mode='resolve';S.beat++;
 }
 
 function drawAura(cx,cy,col,t,alpha=1){
@@ -385,7 +385,7 @@ function frame(t){
       onl=f.threat?'horror':'joy';
     }else{
       const p=S.mode==='beat'?Math.min(1,(t-t0-lurk)/150):1;
-      drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else{g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}});g.restore();
+      drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else if(res.fx==='crumble'){g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}else drawFig(f,420,230,(.6+.35*p),k);});g.restore();
       const seenFor=t-t0-lurk;
       onl=shiftMod==='NIGHT'?'sleep':f.type==='child'?'fear':(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
       if(S.mode==='resolve')onl=f.threat?'joy':'horror';
@@ -477,22 +477,34 @@ requestAnimationFrame(()=>{menuLinks.hidden=false;placeMenu()});
 // ---------- leaderboard (shared db: everyone with the link who can contribute) ----------
 const lbEl=document.getElementById('lb'),lbForm=document.getElementById('lbf'),lbName=document.getElementById('lbname'),lbGo=document.getElementById('lbgo'),lbMsg=document.getElementById('lbmsg'),lbList=document.getElementById('lblist');
 let lbDb=null,board=[],postedRun=false,myDoc=null,runScore=0;
+// outside claude.ai: the shared Supabase leaderboards project (publishable key, protected by RLS; same table as Neon Striker, tagged by game)
+const SB_REST='https://iysvarvkltihgosbhtaa.supabase.co/rest/v1/scores',SB_KEY='sb_publishable_7Kxs-F6HGMgZmb86V1b9_A_qtyUerCh',SB_H={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'};
+let sbOk=false,myEntry=null;
+async function sbTop(){try{const r=await fetch(SB_REST+'?select=name,score,stage&game=eq.palm&order=score.desc&limit=10',{headers:SB_H});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+async function sbRefresh(){const rows=await sbTop();sbOk=!!rows;if(rows){board=rows.map((r,i)=>({id:myEntry&&r.name===myEntry.name&&r.score===myEntry.score?'mine':'sb'+i,name:r.name,score:r.score}));if(myEntry)myDoc='mine'}if(!lbEl.hidden){lbForm.hidden=!(sbOk&&runScore>0&&!postedRun);if(!lbDb)lbMsg.textContent=!sbOk?'Leaderboard unreachable right now.':postedRun?'Posted.':runScore>0?'':'Score something to get on the board.';renderBoard()}}
 try{lbName.value=localStorage.getItem('palm_name')||''}catch(e){}
 function placeBoard(){const w=document.getElementById('wrap').getBoundingClientRect(),c=cv.getBoundingClientRect(),k=c.height/800;
   lbEl.style.left=(c.left-w.left+c.width*.09)+'px';lbEl.style.width=(c.width*.82)+'px';lbEl.style.top=(c.top-w.top+215*k)+'px';lbEl.style.maxHeight=(495*k)+'px';lbEl.style.overflow='hidden'}
 function renderBoard(){lbList.textContent='';
-  if(!board.length){const li=document.createElement('li');li.textContent=lbDb?'No scores yet. Be the first.':'';lbList.appendChild(li);return}
+  if(!board.length){const li=document.createElement('li');li.textContent=(lbDb||sbOk)?'No scores yet. Be the first.':'';lbList.appendChild(li);return}
   board.forEach((r,i)=>{const li=document.createElement('li');if(r.id===myDoc)li.className='me';
     const rk=document.createElement('span');rk.className='rk';rk.textContent=i+1;
     const nm=document.createElement('span');nm.className='nm';nm.textContent=String(r.name||'???').slice(0,14);
     const sc=document.createElement('span');sc.className='sc';sc.textContent=String(r.score|0).padStart(6,'0');
     li.append(rk,nm,sc);lbList.appendChild(li)})}
-function showBoard(){runScore=S.score;postedRun=false;myDoc=null;placeBoard();lbEl.hidden=false;
+function showBoard(){runScore=S.score;postedRun=false;myDoc=null;myEntry=null;placeBoard();lbEl.hidden=false;if(!lbDb){lbForm.hidden=true;lbMsg.textContent='Loading scores…';board=[];renderBoard();sbRefresh();return}
   const can=!!lbDb&&runScore>0;lbForm.hidden=!can;lbGo.disabled=false;
   lbMsg.textContent=!lbDb?'Leaderboard unavailable in this view.':runScore>0?'':'Score something to get on the board.';renderBoard()}
 function hideBoard(){lbEl.hidden=true;if(document.activeElement===lbName)lbName.blur()}
 addEventListener('resize',()=>{if(!lbEl.hidden)placeBoard()});
-lbForm.addEventListener('submit',async e=>{e.preventDefault();if(!lbDb||postedRun)return;
+lbForm.addEventListener('submit',async e=>{e.preventDefault();if(postedRun)return;
+  if(!lbDb){const name=lbName.value.trim().slice(0,16);if(!name){lbMsg.textContent='Type a name first.';lbName.focus();return}
+    try{localStorage.setItem('palm_name',name)}catch(e){}
+    lbGo.disabled=true;lbMsg.textContent='Posting…';
+    const body={game:'palm',name,score:Math.max(0,Math.min(50000000,Math.round(runScore))),grade:'C',stage:Math.max(1,Math.min(999,S.beat||1)),daily:false,date_key:null};
+    let ok=false;try{const r=await fetch(SB_REST,{method:'POST',headers:{...SB_H,Prefer:'return=minimal'},body:JSON.stringify(body)});ok=r.ok}catch(err){}
+    if(ok){postedRun=true;myEntry={name,score:body.score};lbForm.hidden=true;lbMsg.textContent='Posted.';sbRefresh()}else{lbGo.disabled=false;lbMsg.textContent='Could not post. Try again.'}
+    return}
   const name=lbName.value.trim().slice(0,14);if(!name){lbMsg.textContent='Type a name first.';lbName.focus();return}
   try{localStorage.setItem('palm_name',name)}catch(e){}
   lbGo.disabled=true;lbMsg.textContent='Posting…';
