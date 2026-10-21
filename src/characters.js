@@ -1,5 +1,5 @@
 // Characters: who arrives, how they look, and the right call for each.
-import {C,ROSTER,S,G,seen,R,RI} from './state.js';
+import {C,ROSTER,S,G,seen,R,RI,ramp} from './state.js';
 
 // learn, then mix: right after a debut only the newcomer and the Wanderer come; after that, everyone
 // you've met, the two newest a little more often. A type only ever debuts through its intro card.
@@ -25,7 +25,8 @@ function dress(L,smile){if(L.classic)return;const mood=smile?'grin':'grump';L.mg
 export function newFig(){
   const b=S.beat,type=G.force||pickType();G.force=null;
   let threat=Math.random()<.5;
-  const disguise=b>=10&&Math.random()<Math.min(.5,(b-8)*.04);
+  // disguises: quick climb while the roster arrives, then a slow one to a coin flip (50%) by beat 52
+  const disguise=b>=10&&Math.random()<ramp(b,[[10,.08],[16,.32],[52,.5]]);
   const f={type,threat,look:newLook(),empty:false,turnAt:0,turned:false,openAt:0};
   if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.grace;f.slit=false;f.smile=true;f.turnAt=.2+Math.random()*.55}
   else if(type==='lurker'){f.empty=Math.random()<.35;f.aura=threat?C.threat:C.grace;f.slit=threat;f.smile=!threat;if(f.empty)f.threat=false}

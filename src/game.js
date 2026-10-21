@@ -1,5 +1,5 @@
 // Game flow. Modes: title, card, lurk, beat, resolve, fall, over ('x' while a run starts).
-import {S,G,OL,seen,RI} from './state.js';
+import {S,G,OL,seen,RI,ramp} from './state.js';
 import {newFig,correctAct,freshType} from './characters.js';
 import {tone,buzz,kiBoom,startMusic} from './audio.js';
 import {panelOpen,showMenu,hideMenu} from './ui.js';
@@ -20,10 +20,10 @@ export function spawn(){
   G.win=Math.max(1200,2200-S.beat*55); // warm-up, then the clock holds: tension comes from the characters' timing
   if(fig.type==='sleeper'){const ms=150+Math.pow(Math.random(),1.6)*2200;G.win+=ms;fig.openAt=ms/G.win} // wildly variable nap: blink-short to agonizing
   // lurk: variable silence before the reveal. Wider spread as the run goes on.
-  const spread=Math.min(1700,500+S.beat*60);G.lurk=250+Math.random()*spread;
+  const spread=ramp(S.beat,[[0,500],[20,1700],[45,2100]]);G.lurk=250+Math.random()*spread;
   if(fig.type==='lurker'&&Math.random()<.5)G.lurk+=500;
   // most arrivals pop in instantly; once the Lurker is known, a growing share of anyone you've met comes out of the shadow
-  if(fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<Math.min(.35,(S.beat-10)*.02)))G.lurk=0;
+  if(fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<ramp(S.beat,[[10,0],[25,.3],[60,.45]])))G.lurk=0;
   G.t0=performance.now();S.mode='lurk';
 }
 // a mistake: one onlooker leaves ('ko' = knocked out by a threat let through, 'flee' = anything else)
