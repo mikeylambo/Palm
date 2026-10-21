@@ -13,7 +13,7 @@
   --display:"Bangers","Impact",sans-serif; --body:"Zen Kaku Gothic New",system-ui,sans-serif;
   color-scheme:light;
 }
-html,body{height:100%}
+html,body{height:100%;overscroll-behavior:none}
 body{background:var(--ink);color:var(--paper);font-family:var(--body);margin:0;display:flex;flex-direction:column;align-items:center;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;box-sizing:border-box;overflow:hidden;touch-action:manipulation}
 [hidden]{display:none!important}
@@ -42,13 +42,20 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);margin:0;d
 #lblist .rk{width:2ch;color:var(--grace);font-family:var(--display);font-size:20px}
 #lblist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #lblist .sc{font-family:var(--display);font-size:20px;letter-spacing:.04em}
-canvas{max-width:100%;max-height:100%;aspect-ratio:3/4;background:var(--paper);border:3px solid var(--paper);display:block}
+canvas{max-width:100%;max-height:100%;aspect-ratio:3/4;background:var(--paper);border:3px solid var(--paper);display:block;touch-action:none}
 #ctl{display:flex;gap:12px;width:100%;max-width:600px;padding-top:10px}
 button{flex:1;font-family:var(--display);font-size:clamp(22px,6vw,34px);letter-spacing:.06em;padding:12px 0;border:3px solid var(--paper);cursor:pointer;color:var(--ink)}
 #pass{background:var(--paper)}
 #blast{background:var(--violet);color:#fff}
 button:focus-visible{outline:3px solid var(--grace);outline-offset:3px}
 button small{display:block;font-family:var(--body);font-size:11px;letter-spacing:.1em;opacity:.7}
+/* landscape phones: PASS and BLAST flank the stage (thumbs on either side) so the canvas gets the full height */
+@media (orientation:landscape) and (max-height:520px){
+  body{flex-direction:row;align-items:stretch;gap:12px}
+  #ctl{display:contents}
+  #pass,#blast{flex:0 0 min(22%,200px)}
+  #pass{order:0} #wrap{order:1} #blast{order:2}
+}
 </style>
 <div id="wrap"><canvas id="c" width="600" height="800" aria-label="PALM game stage"></canvas>
 <button id="btn-pause" type="button" hidden aria-label="Pause">II</button>

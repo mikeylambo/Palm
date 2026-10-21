@@ -53,16 +53,12 @@ Three onlookers (bowl cut, spiky, topknot). Letting a threat through knocks one 
 - `src/main.js`: main loop (`frame()`), plus a read-only `window.PALM` hook used by the tests
 - Music: `<audio id="bgm" src="music.mp3">`. Drop `music.mp3` in the repo root. It loops, follows the volume slider, and ducks during the Lurker wait, pause and the game-over slump.
 
-## Known bugs (fix these first)
+## Status
 
-1. **Characters debut without their intro card.** Intros are skipped while a rule card is active (`if(!rule&&maybeIntro())`), but `pickType()` still returns unseen types during rule beats. Twins showed up before their card. Fix: never pick an unseen type unless its intro is shown.
-2. **P / Esc don't pause for the owner** in the Vercel build, although automated tests pause fine. Reproduce in a real browser; suspects: focus on a game button, the pause button `setInterval`, or a cached build.
-3. **No way back to the title screen.** Add a `TITLE` option on the pause screen and on game over.
+Fixed: intro cards (types only debut through `maybeIntro()`), pause keys (no auto-repeat toggling, `KeyP` on any layout, capture phase, game buttons never take focus), TITLE on the pause screen and at game over. Done: ES module split (verified pixel-identical with a seeded replay), `npm test`, phone/desktop pass (landscape phones put PASS/BLAST either side of the stage; panels cover the stage; no pull-to-refresh on swipes).
 
-## Wrap-up list
+Pause note: the owner's report never reproduced headless. The live build had the code and isn't cached. If P still fails for the owner, check which browser and keyboard layout they use, and whether an extension grabs keys.
 
-1. Fix the known bugs above.
-2. Light refactor: split into a few ES modules (state, characters/faces, render, ui/menus, leaderboard) without changing behavior.
-3. Add a small headless test (Playwright) that plays through every character type and checks for console errors.
-4. Full pass on phone and desktop: overlaps at game over, pause, settings and credits panels, swipe controls.
-5. Hook up the owner's music when provided.
+## Remaining
+
+1. Hook up the owner's music: drop `music.mp3` in the repo root (wiring is done).

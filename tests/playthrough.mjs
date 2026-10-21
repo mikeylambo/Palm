@@ -30,7 +30,7 @@ function virtualClock(){
 
 const fails=[],check=(ok,what)=>{console.log((ok?'  ok   ':'  FAIL ')+what);if(!ok)fails.push(what)};
 const browser=await chromium.launch();
-const page=await browser.newPage({viewport:{width:900,height:1000}});
+const page=await browser.newPage({viewport:{width:900,height:1000},hasTouch:true});
 const errors=[];
 // fonts, the leaderboard and the (optional) music file are outside the game; ignore their network noise
 const external=/fonts\.g|supabase|music\.mp3/;
@@ -79,7 +79,23 @@ await page.click('#btn-title');
 const atTitle=await page.evaluate(()=>({mode:PALM.S.mode,paused:PALM.G.paused,score:PALM.S.score}));
 check(atTitle.mode==='title'&&!atTitle.paused&&atTitle.score===0,'TITLE on the pause screen returns to the title');
 
-// 4. lose on purpose: always blast, reach game over, TITLE from there too
+// 4. swipes: tap starts and dismisses cards, swipe right blasts, swipe down passes
+const swipes=await page.evaluate(()=>{const P=window.PALM,cv=document.getElementById('c'),r={};
+  const touch=(type,x,y)=>{const t=new Touch({identifier:1,target:cv,clientX:x,clientY:y});cv.dispatchEvent(new TouchEvent(type,{touches:type==='touchend'?[]:[t],changedTouches:[t],bubbles:true}))};
+  const swipe=(dx,dy)=>{touch('touchstart',300,300);touch('touchend',300+dx,300+dy)};
+  const toBeat=()=>{for(let f=0;f<600&&!(P.S.mode==='beat'&&!P.fig.empty);f++){__step(1000/60);if(P.S.mode==='card'&&f%40===39)swipe(0,0)}};
+  swipe(0,0);r.started=P.S.mode!=='title';
+  toBeat();swipe(0,0);__step(16);r.tapIgnored=P.S.mode==='beat';
+  swipe(120,10);r.right=P.G.res&&P.G.res.a;
+  toBeat();swipe(5,120);r.down=P.G.res&&P.G.res.a;
+  dispatchEvent(new KeyboardEvent('keydown',{key:'p'}));return r});
+check(swipes.started,'a tap on the stage starts a run');
+check(swipes.tapIgnored,'a tap during a beat does nothing');
+check(swipes.right==='blast','swipe right blasts');
+check(swipes.down==='pass','swipe down lets it pass');
+await page.click('#btn-title');
+
+// 5. lose on purpose: always blast, reach game over, TITLE from there too
 const over=await page.evaluate(()=>{const P=window.PALM,key=k=>dispatchEvent(new KeyboardEvent('keydown',{key:k}));
   for(let f=0;f<20000&&P.S.mode!=='over';f++){__step(1000/60);if(f%20===0)key(P.S.mode==='card'?'ArrowLeft':' ')}
   return P.S.mode});

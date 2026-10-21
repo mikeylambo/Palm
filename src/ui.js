@@ -15,7 +15,7 @@ pauseBtn.onclick=()=>{G.paused?resume():pause();pauseBtn.blur()};
 addEventListener('keydown',e=>{if(e.repeat||!panelEl.hidden||e.target.tagName==='INPUT')return;if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.code==='KeyP'||e.key==='Pause'){e.preventDefault();G.paused?resume():pause()}},true);
 // game buttons never take focus, so keys always reach the game and Space never double-fires a focused button
 [pauseBtn,blastBtn,passBtn].forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
-setInterval(()=>{const on=playing();pauseBtn.hidden=!on;if(on){const w=wrapEl.getBoundingClientRect(),c=cv.getBoundingClientRect();pauseBtn.style.left=(c.right-w.left-54)+'px';pauseBtn.style.top=(c.top-w.top+10)+'px';pauseBtn.textContent=G.paused?'▶':'II'}},150);
+setInterval(()=>{const on=playing()&&panelEl.hidden;pauseBtn.hidden=!on;if(on){const w=wrapEl.getBoundingClientRect(),c=cv.getBoundingClientRect();pauseBtn.style.left=(c.right-w.left-54)+'px';pauseBtn.style.top=(c.top-w.top+10)+'px';pauseBtn.textContent=G.paused?'▶':'II'}},150);
 addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 blastBtn.onclick=()=>act('blast');
 passBtn.onclick=()=>act('pass');
@@ -29,7 +29,9 @@ addEventListener('keydown',e=>{if(e.repeat||e.target.tagName==='INPUT'||!panelEl
 // ---------- menus: settings, credits, title ----------
 function canvasBox(){const w=wrapEl.getBoundingClientRect(),c=cv.getBoundingClientRect();return{l:c.left-w.left,t:c.top-w.top,w:c.width,h:c.height,k:c.height/800}}
 function placeMenu(){const b=canvasBox();menuLinks.style.left=b.l+'px';menuLinks.style.width=b.w+'px';const fs=Math.max(13,Math.min(20,b.k*26));menuLinks.querySelectorAll('button').forEach(x=>{x.style.fontSize=fs+'px';x.style.padding=(fs*.3)+'px '+(fs*.8)+'px'});menuLinks.style.top=(b.t+(S.mode==='over'?785*b.k-fs*2.2:G.paused?500*b.k:620*b.k))+'px';
-  panelEl.style.left=(b.l+b.w*.08)+'px';panelEl.style.width=(b.w*.84)+'px';panelEl.style.top=(b.t+b.h*.1)+'px';panelEl.style.maxHeight=(b.h*.8)+'px'}
+  // panels cover the whole stage, but never shrink below a readable size (landscape phones)
+  const W=wrapEl.clientWidth,H=wrapEl.clientHeight,pw=Math.min(W,Math.max(b.w,300)),ph=Math.min(H,Math.max(b.h,340));
+  panelEl.style.left=Math.max(0,b.l+(b.w-pw)/2)+'px';panelEl.style.width=pw+'px';panelEl.style.top=Math.max(0,b.t+(b.h-ph)/2)+'px';panelEl.style.height=ph+'px';panelEl.style.maxHeight=''}
 export function showMenu(){titleBtn.hidden=S.mode==='title';menuLinks.hidden=false;placeMenu()}
 export function hideMenu(){menuLinks.hidden=true}
 function openPanel(kind){placeMenu();lbEl.hidden=true;panelEl.textContent='';const h=document.createElement('h2');panelEl.appendChild(h);
@@ -39,7 +41,7 @@ function openPanel(kind){placeMenu();lbEl.hidden=true;panelEl.textContent='';con
   }else{h.textContent='CREDITS';
     [['Game','Mikey Lambo'],['Music','Mikey Lambo']].forEach(([role,who])=>{const d=document.createElement('div');d.className='credit';const b=document.createElement('b');b.textContent=role;d.append(b,who);panelEl.appendChild(d)})}
   const x=document.createElement('button');x.type='button';x.className='close';x.textContent='BACK';x.onclick=closePanel;panelEl.appendChild(x);
-  panelEl.hidden=false;menuLinks.hidden=true;x.focus()}
+  panelEl.hidden=false;menuLinks.hidden=true;pauseBtn.hidden=true;panelEl.scrollTop=0;x.focus({preventScroll:true})}
 function closePanel(){panelEl.hidden=true;if(S.mode==='title'||S.mode==='over'||G.paused)showMenu();if(S.mode==='over'){lbEl.hidden=false;placeBoard()}}
 document.getElementById('btn-settings').onclick=()=>openPanel('settings');
 document.getElementById('btn-credits').onclick=()=>openPanel('credits');
