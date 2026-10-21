@@ -52,7 +52,7 @@ button small{display:block;font-family:var(--body);font-size:11px;letter-spacing
 </style>
 <div id="wrap"><canvas id="c" width="600" height="800" aria-label="PALM game stage"></canvas>
 <button id="btn-pause" type="button" hidden aria-label="Pause">II</button>
-<div id="menu-links" hidden><button id="btn-settings" type="button">SETTINGS</button><button id="btn-credits" type="button">CREDITS</button></div>
+<div id="menu-links" hidden><button id="btn-settings" type="button">SETTINGS</button><button id="btn-credits" type="button">CREDITS</button><button id="btn-title" type="button" hidden>TITLE</button></div>
 <div id="panel" hidden role="dialog" aria-modal="true"></div>
 <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
 <div id="lb" hidden>
@@ -93,7 +93,9 @@ function pickType(){const b=S.beat,unlocked=Object.entries(ROSTER).filter(([k,v]
   // rotation, not stacking: wanderer + the 2 newest specials; the newest one shows up most
   const sp=unlocked.slice(1).slice(-2);let pool=['wanderer',...sp,...(sp.length?[sp[sp.length-1]]:[])];
   if(shiftMod==='ALL')pool=['wanderer',...unlocked.slice(1)];if(shiftMod==='ONE')pool=[oneType];
-  const fresh=unlocked.find(k=>!seen.has(k));if(fresh)return fresh;return pool[Math.floor(Math.random()*pool.length)]}
+  // a type only ever debuts through its intro card (maybeIntro), never mid-rule
+  pool=pool.filter(k=>seen.has(k));if(!pool.length)return'wanderer';return pool[Math.floor(Math.random()*pool.length)]}
+function freshType(){const e=Object.entries(ROSTER).find(([k,v])=>S.beat>=v.at&&!seen.has(k));return e&&e[0]}
 const R=(a,b)=>a+Math.random()*(b-a),RI=n=>Math.floor(Math.random()*n);
 const SKIN=['#ffffff','#f6ead8','#ead2b4','#d3ad87','#a87a56','#7d5539'];
 let lastClassic=false;
@@ -122,8 +124,8 @@ function correctAct(f,k){
 }
 function maybeIntro(){
   // first time a character type appears, show its card
-  const type=pickType();
-  if(!seen.has(type)){seen.add(type);force=type;card={kind:'intro',type,t:performance.now()};S.mode='card';tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120);return true}
+  const type=freshType();
+  if(type){seen.add(type);force=type;card={kind:'intro',type,t:performance.now()};S.mode='card';tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120);return true}
   return false;
 }
 const MODS={ALL:['ALL HANDS','Every arrival you have met, all at once.'],FAST:['DOUBLE TIME','Everything comes 25% faster.'],NIGHT:['NIGHT SHIFT','The crowd is asleep. You are on your own.'],ONE:['ONE FACE','The same kind of arrival, over and over.']};
@@ -367,7 +369,7 @@ function frame(t){
     if(fig.empty&&k>.55){S.score+=50*S.combo;S.combo=Math.min(8,S.combo+1);res={a:'none',ok:true,t,dur:350};S.mode='resolve';S.beat++}
     else if(k>1)act('pass')}
   if(S.mode==='resolve'&&t-res.t>res.dur){if(S.strikes>=3){S.mode='fall';fallT=t;tone(110,1.1,'sine',.2,40)}else startBeat()}
-  if(S.mode==='fall'&&t-fallT>1600){S.mode='over';showBoard();menuLinks.hidden=false;placeMenu();if(S.score>S.best){S.best=S.score;try{localStorage.setItem('palm_best',S.best)}catch(e){}}}
+  if(S.mode==='fall'&&t-fallT>1600){S.mode='over';showBoard();showMenu();if(S.score>S.best){S.best=S.score;try{localStorage.setItem('palm_best',S.best)}catch(e){}}}
   if(S.mode==='card'&&card.kind==='rule'&&t-card.t>1300)spawn();
   if(S.mode==='card'&&card.kind==='shift'&&t-card.t>1800){S.mode='x';if(!maybeIntro())spawn()}
   }
@@ -444,11 +446,13 @@ function frame(t){
   if(paused){g.fillStyle='rgba(17,16,20,.8)';g.fillRect(0,0,600,800);txt('PAUSED',300,400,90,C.paper);g.font='18px "Zen Kaku Gothic New",sans-serif';g.textAlign='center';g.fillStyle=C.grace;g.fillText('Press any button to resume',300,450)}
   g.restore();requestAnimationFrame(frame);
 }
-function pause(){if(!paused&&['lurk','beat','resolve','card'].includes(S.mode)){paused=true;pauseAt=performance.now();buffered=null}}
-function resume(){if(!paused)return;const d=performance.now()-pauseAt;t0+=d;if(res)res.t+=d;if(card)card.t+=d;paused=false}
+function pause(){if(!paused&&['lurk','beat','resolve','card'].includes(S.mode)){paused=true;pauseAt=performance.now();buffered=null;showMenu()}}
+function resume(){if(!paused)return;const d=performance.now()-pauseAt;t0+=d;if(res)res.t+=d;if(card)card.t+=d;paused=false;menuLinks.hidden=true}
 const pauseBtn=document.getElementById('btn-pause');
 pauseBtn.onclick=()=>{paused?resume():pause();pauseBtn.blur()};
-addEventListener('keydown',e=>{if((e.key==='Escape'||e.key==='p'||e.key==='P')&&panelEl.hidden&&e.target.tagName!=='INPUT'){e.preventDefault();paused?resume():pause()}});
+addEventListener('keydown',e=>{if(e.repeat||!panelEl.hidden||e.target.tagName==='INPUT')return;if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.code==='KeyP'||e.key==='Pause'){e.preventDefault();paused?resume():pause()}},true);
+// game buttons never take focus, so keys always reach the game and Space never double-fires a focused button
+[pauseBtn,document.getElementById('blast'),document.getElementById('pass')].forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
 setInterval(()=>{const playing=['lurk','beat','resolve','card'].includes(S.mode);pauseBtn.hidden=!playing;if(playing){const w=document.getElementById('wrap').getBoundingClientRect(),c=cv.getBoundingClientRect();pauseBtn.style.left=(c.right-w.left-54)+'px';pauseBtn.style.top=(c.top-w.top+10)+'px';pauseBtn.textContent=paused?'\u25B6':'II'}},150);
 addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 document.getElementById('blast').onclick=()=>act('blast');
@@ -462,7 +466,7 @@ requestAnimationFrame(frame);
 // ---------- menus: settings, credits, music ----------
 const menuLinks=document.getElementById('menu-links'),panelEl=document.getElementById('panel'),bgm=document.getElementById('bgm');
 function canvasBox(){const w=document.getElementById('wrap').getBoundingClientRect(),c=cv.getBoundingClientRect();return{l:c.left-w.left,t:c.top-w.top,w:c.width,h:c.height,k:c.height/800}}
-function placeMenu(){const b=canvasBox();menuLinks.style.left=b.l+'px';menuLinks.style.width=b.w+'px';const fs=Math.max(13,Math.min(20,b.k*26));menuLinks.querySelectorAll('button').forEach(x=>{x.style.fontSize=fs+'px';x.style.padding=(fs*.3)+'px '+(fs*.8)+'px'});menuLinks.style.top=(b.t+(S.mode==='over'?785*b.k-fs*2.2:620*b.k))+'px';
+function placeMenu(){const b=canvasBox();menuLinks.style.left=b.l+'px';menuLinks.style.width=b.w+'px';const fs=Math.max(13,Math.min(20,b.k*26));menuLinks.querySelectorAll('button').forEach(x=>{x.style.fontSize=fs+'px';x.style.padding=(fs*.3)+'px '+(fs*.8)+'px'});menuLinks.style.top=(b.t+(S.mode==='over'?785*b.k-fs*2.2:paused?500*b.k:620*b.k))+'px';
   panelEl.style.left=(b.l+b.w*.08)+'px';panelEl.style.width=(b.w*.84)+'px';panelEl.style.top=(b.t+b.h*.1)+'px';panelEl.style.maxHeight=(b.h*.8)+'px'}
 function startMusic(){try{bgm.volume=SET.music;if(bgm.paused)bgm.play().catch(()=>{})}catch(e){}}
 function musicLevel(){try{const duck=S.mode==='lurk'||paused||S.mode==='fall';bgm.volume=SET.music*(duck?.25:1)}catch(e){}}
@@ -475,9 +479,12 @@ function openPanel(kind){placeMenu();lbEl.hidden=true;panelEl.textContent='';con
     [['Game','Mikey Lambo'],['Music','Mikey Lambo']].forEach(([role,who])=>{const d=document.createElement('div');d.className='credit';const b=document.createElement('b');b.textContent=role;d.append(b,who);panelEl.appendChild(d)})}
   const x=document.createElement('button');x.type='button';x.className='close';x.textContent='BACK';x.onclick=closePanel;panelEl.appendChild(x);
   panelEl.hidden=false;menuLinks.hidden=true;x.focus()}
-function closePanel(){panelEl.hidden=true;if(S.mode==='title'||S.mode==='over'){menuLinks.hidden=false;placeMenu()}if(S.mode==='over'){lbEl.hidden=false;placeBoard()}}
+function showMenu(){titleBtn.hidden=S.mode==='title';menuLinks.hidden=false;placeMenu()}
+function goTitle(){paused=false;buffered=null;hideBoard();panelEl.hidden=true;fig=null;res=null;card=null;rule=null;ruleLeft=0;shake=0;missT=-9999;OL.forEach(o=>{o.gone=0;o.kind=''});S={...S,mode:'title',score:0,combo:1,strikes:0,beat:0,heat:0};showMenu()}
+function closePanel(){panelEl.hidden=true;if(S.mode==='title'||S.mode==='over'||paused)showMenu();if(S.mode==='over'){lbEl.hidden=false;placeBoard()}}
 document.getElementById('btn-settings').onclick=()=>openPanel('settings');
 document.getElementById('btn-credits').onclick=()=>openPanel('credits');
+const titleBtn=document.getElementById('btn-title');titleBtn.onclick=goTitle;
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!panelEl.hidden)closePanel()});
 addEventListener('resize',()=>{if(!menuLinks.hidden||!panelEl.hidden)placeMenu()});
 requestAnimationFrame(()=>{menuLinks.hidden=false;placeMenu()});
