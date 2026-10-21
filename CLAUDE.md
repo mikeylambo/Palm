@@ -22,6 +22,7 @@ The game got better every time something was cut. Treat these as hard constraint
 - Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button` (no Best line).
 - **The face that ended your run** fades back into the top panel, still and with no caption, while the guardian slumps, and stays faintly behind GAME OVER. A blast at thin air leaves the panel empty.
 - No rule moments: `LET NOTHING PASS` / `MERCY` were cut.
+- **Never cheat the player:** every mistake must be readable on screen at the moment you act. No type may look identical to another with a different rule.
 - **Kind tone:** no children, no crying, no demon masks.
 - **Music target: about 174 BPM.** The game is not beat-synced; the track loops underneath.
 
@@ -33,7 +34,7 @@ The game got better every time something was cut. Treat these as hard constraint
 | Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = FLINCHED |
 | Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = FLINCHED |
 | Twins | 23 | Two faces. Blast if either is a threat |
-| Turncoat | 30 | Smiles, some turn 20–75% into the beat. Moving before the turn = FLINCHED |
+| Turncoat | 30 | Violet aura (like Sleeper and Twins: violet = a special, watch the eyes), smiles; some turn 20–65% into the beat (always ~0.4 s left to blast). Moving before the turn = FLINCHED |
 
 Cut on purpose: Mirror, The Masked, Herald, The Child, The Dancer. The roster ends at the Turncoat; no sixth type unless the owner asks. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often.
 

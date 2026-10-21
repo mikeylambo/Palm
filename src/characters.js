@@ -29,7 +29,7 @@ export function newFig(){
   // quick climb, then a slow one to a coin flip (50%) by beat 52
   const disguise=b>=14&&!(G.learnLeft>0)&&Math.random()<ramp(b,[[14,.08],[20,.32],[52,.5]]);
   const f={type,threat,look:newLook(),empty:false,turnAt:0,turned:false,openAt:0};
-  if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.grace;f.slit=false;f.smile=true;f.turnAt=.2+Math.random()*.55}
+  if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.violet;f.slit=false;f.smile=true;f.turnAt=.2+Math.random()*.45} // violet = a special: watch the eyes; latest turn leaves ~0.4 s
   else if(type==='lurker'){f.empty=Math.random()<.35;f.aura=threat?C.threat:C.grace;f.slit=threat;f.smile=!threat;if(f.empty)f.threat=false}
   else if(type==='sleeper'){f.aura=C.violet;f.slit=threat;f.smile=!threat;f.openAt=.2+Math.random()*.35}
   else if(type==='twins'){const a=Math.random()<.5,b2=Math.random()<.5;f.threat=a||b2;f.aura=C.violet;
