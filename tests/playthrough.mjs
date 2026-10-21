@@ -8,7 +8,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const TYPES=['wanderer','lurker','sleeper','twins','turncoat','dancer'];
+const TYPES=['wanderer','lurker','sleeper','twins','turncoat'];
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css'};
 const server=http.createServer(async(req,res)=>{
   const rel=decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/,'/index.html');

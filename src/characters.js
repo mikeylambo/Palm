@@ -32,7 +32,6 @@ export function newFig(){
   else if(type==='sleeper'){f.aura=C.violet;f.slit=threat;f.smile=!threat;f.openAt=.2+Math.random()*.35}
   else if(type==='twins'){const a=Math.random()<.5,b2=Math.random()<.5;f.threat=a||b2;f.aura=C.violet;
     f.pair=[{slit:a,smile:Math.random()<.5,look:newLook()},{slit:b2,smile:Math.random()<.5,look:newLook()}]}
-  else if(type==='dancer'){f.threat=false;f.aura=C.threat;f.slit=false;f.smile=true;Object.assign(f.look,{classic:false,head:0,hat:0,mg:'none',tilt:0})}
   else{const at=disguise?!threat:threat;f.aura=at?C.threat:C.grace;f.slit=threat;f.smile=disguise?!threat:!threat}
   dress(f.look,f.smile);if(f.pair)f.pair.forEach(p=>dress(p.look,p.smile));
   return f;

@@ -87,20 +87,6 @@ function face(L,o){ // parametric head: o={slit,smile,turned,closed,big,react}
   g.restore();
 }
 function collar(){g.fillStyle=C.dim;g.beginPath();g.moveTo(-70,70);g.lineTo(0,58);g.lineTo(70,70);g.lineTo(90,130);g.lineTo(-90,130);g.closePath();g.fill();g.lineWidth=3;g.strokeStyle=C.ink;g.stroke()}
-// the Dancer: a red festival demon mask, tied on a little crooked, a grin showing below it, a paper fan
-function oniMask(L,T,react){const w=L.w,h=L.h;g.save();g.lineWidth=3;g.strokeStyle=C.ink;g.lineJoin='round';
-  g.beginPath();g.moveTo(-w*1.02,-h*.35);g.lineTo(-w*1.25,-h*.2);g.moveTo(w*1.02,-h*.35);g.lineTo(w*1.25,-h*.25);g.stroke(); // the string
-  g.rotate(react==='panic'?.5:-.08+Math.sin(T/260)*.03);
-  g.fillStyle='#f4ead2';[-1,1].forEach(s2=>{g.beginPath();g.moveTo(s2*w*.35,-h*.82);g.quadraticCurveTo(s2*w*.55,-h*1.3,s2*w*.3,-h*1.55);g.quadraticCurveTo(s2*w*.2,-h*1.15,s2*w*.12,-h*.88);g.closePath();g.fill();g.stroke()});
-  g.fillStyle=C.threat;g.beginPath();g.ellipse(0,-h*.28,w*1.08,h*.64,0,0,7);g.fill();g.lineWidth=4;g.stroke();
-  g.lineWidth=6;g.beginPath();[-1,1].forEach(s2=>{g.moveTo(s2*w*.78,-h*.62);g.lineTo(s2*w*.12,-h*.38)});g.stroke();
-  g.lineWidth=3;[-1,1].forEach(s2=>{g.fillStyle=C.grace;g.beginPath();g.ellipse(s2*w*.42,-h*.24,w*.2,h*.11,s2*.25,0,7);g.fill();g.stroke();g.fillStyle=C.ink;g.beginPath();g.arc(s2*w*.42,-h*.24,4,0,7);g.fill()});
-  g.fillStyle='#fff';g.beginPath();g.moveTo(-w*.55,h*.08);g.quadraticCurveTo(0,h*.3,w*.55,h*.08);g.closePath();g.fill();g.stroke();
-  g.fillStyle='#fff';[-1,1].forEach(s2=>{g.beginPath();g.moveTo(s2*w*.42,h*.1);g.lineTo(s2*w*.32,h*.3);g.lineTo(s2*w*.24,h*.14);g.closePath();g.fill();g.stroke()});
-  g.restore();
-  // fan, bobbing to the festival
-  g.save();g.translate(w*1.35,h*.7);g.rotate(Math.sin(T/180)*.35);g.lineWidth=3;g.strokeStyle=C.ink;g.beginPath();g.moveTo(0,0);g.lineTo(0,-34);g.stroke();
-  g.fillStyle='#fff';g.beginPath();g.arc(0,-56,24,0,7);g.fill();g.stroke();g.fillStyle=C.threat;g.beginPath();g.arc(0,-56,9,0,7);g.fill();g.restore()}
 function drawFig(f,cx,cy,sc,k){
   const turned=f.type==='turncoat'&&f.threat&&k>=f.turnAt;
   const closed=f.type==='sleeper'&&k<f.openAt;
@@ -114,7 +100,6 @@ function drawFig(f,cx,cy,sc,k){
   }
   collar();
   face(f.look,{slit:turned||f.slit,smile:turned?false:f.smile,turned,closed:closed&&react!=='panic',react});
-  if(f.type==='dancer')oniMask(f.look,T,react);
   g.restore();
 }
 function drawShadow(t,p){
@@ -146,7 +131,6 @@ function drawGuardian(push,slump=0){
   g.restore();
   });
 }
-let scream=0; // 0..1: how long the crowd has been screaming at the Dancer
 function drawOnlookers(state){
   // the three onlookers ARE your lives. A threat let through knocks one out; any other mistake makes one flee.
   g.save();poly(BOT,20);g.fillStyle='#f6f2ea';g.fill();g.clip();
@@ -158,7 +142,6 @@ function drawOnlookers(state){
     g.save();
     const e=o.gone?(o.kind==='ko'?'ko':'flee'):state;
     if(e==='fear'||e==='horror'||e==='flee')g.translate((Math.random()-.5)*4,(Math.random()-.5)*4);
-    if(e==='scream'){const z=4+scream*16;g.translate((Math.random()-.5)*z,(Math.random()-.5)*z-scream*26);g.strokeStyle=C.ink;g.lineWidth=2.5;for(let i=0;i<7;i++){const a=-Math.PI*.95+i*Math.PI*.15,r0=r*1.25,r1=r0+14+scream*26+j(i+n*9)*8;g.beginPath();g.moveTo(x+Math.cos(a)*r0,y+Math.sin(a)*r0);g.lineTo(x+Math.cos(a)*r1,y+Math.sin(a)*r1);g.stroke()}}
     if(o.gone&&o.kind==='ko'){g.translate(x+q*220,y-q*260+q*q*120);g.rotate(q*9);g.translate(-x,-y)}
     if(o.gone&&o.kind==='flee'){g.translate(q*q*320,-q*30)}
     g.strokeStyle=C.ink;g.lineWidth=3;g.fillStyle='#fff';g.beginPath();g.arc(x,y,r,0,7);g.fill();g.stroke();
@@ -169,8 +152,6 @@ function drawOnlookers(state){
     g.lineWidth=3;
     if(e==='ko'){[-1,1].forEach(s2=>{const ex=x+s2*r*.35,ey=y-4;g.beginPath();g.moveTo(ex-6,ey-6);g.lineTo(ex+6,ey+6);g.moveTo(ex+6,ey-6);g.lineTo(ex-6,ey+6);g.stroke()});g.beginPath();g.ellipse(x,y+r*.4,6,10,0,0,7);g.stroke();
       g.fillStyle=C.grace;for(let i=0;i<3;i++){const a=T/120+i*2.1;g.font='bold 18px sans-serif';g.fillText('★',x+Math.cos(a)*r*1.1-6,y-r*1.1+Math.sin(a)*8)}}
-    else if(e==='scream'){[-1,1].forEach(s2=>{g.fillStyle='#fff';g.beginPath();g.arc(x+s2*r*.35,y-8,11,0,7);g.fill();g.stroke();g.fillStyle=C.ink;g.beginPath();g.arc(x+s2*r*.35,y-8,2.5,0,7);g.fill()});
-      g.fillStyle=C.ink;g.beginPath();g.ellipse(x,y+r*.4,13+scream*5,16+scream*12,0,0,7);g.fill();g.fillStyle='#e8627a';g.beginPath();g.ellipse(x,y+r*.4+8+scream*8,7,4,0,0,7);g.fill()}
     else if(e==='fear'||e==='horror'||e==='flee'){[-1,1].forEach(s2=>{g.fillStyle='#fff';g.beginPath();g.arc(x+s2*r*.35,y-5,10,0,7);g.fill();g.stroke();g.fillStyle=C.ink;g.beginPath();g.arc(x+s2*r*.35,y-5,3,0,7);g.fill()});
       g.fillStyle=C.ink;g.beginPath();g.ellipse(x,y+r*.42,12,e==='fear'?11:19,0,0,7);g.fill();
       g.fillStyle='#7fb6e8';g.beginPath();g.ellipse(x+r*.8,y-r*.4,5,9,0,0,7);g.fill();g.beginPath();g.ellipse(x-r*.85,y-r*.25,4,7,0,0,7);g.fill();
@@ -211,7 +192,7 @@ export function draw(t){
     }else{
       const p=S.mode==='beat'?Math.min(1,(t-t0-lurk)/150):1;
       drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else if(res&&res.fx==='crumble'){g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}else drawFig(f,420,230,(.6+.35*p),k);});g.restore();
-      scream=Math.max(0,Math.min(1,k));onl=f.type==='dancer'?'scream':(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
+      onl=(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
       if(S.mode==='resolve')onl=f.threat?'joy':'horror';
     }
   }else{g.save();poly(TOP);g.clip();g.strokeStyle='#c9c6b8';g.lineWidth=1;for(let i=0;i<30;i++){g.beginPath();g.moveTo(180+i*15,40);g.lineTo(160+i*15,480);g.stroke()}g.restore()}

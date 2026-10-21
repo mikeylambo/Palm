@@ -8,11 +8,13 @@ PALM is a WarioWare-paced reaction game. A masked, robed guardian holds up a pal
 
 ## Design rules (settled with the owner, do not reopen)
 
+Ask the owner before changing how the game plays or looks. Feel words: raw, intentional jank, reflexive, high energy.
+
 The game got better every time something was cut. Treat these as hard constraints:
 
 - **Less is more.** Do not add new characters, rule types, cards, banners, text, shifts, daily runs, unlocks or cosmetics unless asked.
 - **On-screen words during play:** only `BLASTED`, `PASSED`, `FLINCHED` (big, centered). FLINCHED = any move made too early: at a shadow, at empty air, at shut eyes, before a turn. No other feedback text.
-- **The clock holds:** reaction window warms up from 2.2 s (−55 ms per beat) and then stays at 1.2 s. No steady speed-up; tension comes from the characters' timing (shadow waits, naps, late turns, the crowd's scream).
+- **The clock holds:** reaction window warms up from 2.2 s (−55 ms per beat) and then stays at 1.2 s. No steady speed-up; tension comes from the characters' timing (shadow waits, naps, late turns). Still being tuned with the owner; the design doc's tempo steps are an open option.
 - **Arrivals pop in instantly,** except the Lurker and, once the Lurker is known, a growing share of anyone you've met (up to 35%), who come out of the shadow. Only the Lurker can turn out to be nothing.
 - **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size.
 - **The blast is a Hakai, not a ki blast:** instant, no charge, no beam. Violet flash (no screen invert), whiteout, palm thrust, deep boom. The blasted face does one of three things, 33/33/33: fling, crumble into ink flakes, or simply get covered by the white. Every blast holds its first frame for 75 ms (hit-stop, `HITSTOP` in `game.js`); correct reads also get an 85 ms beat before it.
@@ -20,7 +22,7 @@ The game got better every time something was cut. Treat these as hard constraint
 - Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button` (no Best line).
 - **The face that ended your run** fades back into the top panel, still and with no caption, while the guardian slumps, and stays faintly behind GAME OVER. A blast at thin air leaves the panel empty.
 - No rule moments: `LET NOTHING PASS` / `MERCY` were cut.
-- **Kind tone:** nobody you should spare is a child or crying. The "crowd is wrong" character is a festival dancer in a demon mask.
+- **Kind tone:** no children, no crying, no demon masks.
 - **Music target: about 174 BPM.** The game is not beat-synced; the track loops underneath.
 
 ## Roster (unlock beat)
@@ -32,9 +34,12 @@ The game got better every time something was cut. Treat these as hard constraint
 | Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = FLINCHED |
 | Twins | 23 | Two faces. Blast if either is a threat |
 | Turncoat | 30 | Smiles, some turn 20–75% into the beat. Moving before the turn = FLINCHED |
-| Dancer | 37 | Festival dancer, red demon mask (tied on crooked, grin below, paper fan), red aura. The crowd screams, louder and shakier the longer you hold, with a wail. Always pass |
 
-Cut on purpose: Mirror, The Masked, Herald, The Child. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often.
+Cut on purpose: Mirror, The Masked, Herald, The Child, The Dancer. The roster ends at the Turncoat; no sixth type unless the owner asks. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often.
+
+## Faces
+
+Gags follow the owner's Face Lab rules (`GAGS` in `characters.js`, picked per mood by weight): mouth none 75 / tongue 25 (grins only); brows none 67 / raised 33 / wiggle 10 / unibrow 10; cheeks none 40 / blush 40 / sweat 20; smug lids on 50% of grins; v1 face 17%, no gags. Buck teeth, chatter, gap, drool, wavy, nose hair and snot bubble are off.
 
 ## Lives and onlookers
 

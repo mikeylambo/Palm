@@ -7,7 +7,6 @@ export const ROSTER={
   sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Move first and you flinch.',at:16},
   twins:{name:'TWINS',tip:'Two faces, one verdict. Blast if either one is a threat.',at:23},
   turncoat:{name:'TURNCOAT',tip:'Smiles at first. Some turn. Move before the turn and you flinch.',at:30},
-  dancer:{name:'THE DANCER',tip:'A festival dancer in a demon mask. The crowd screams. It is a costume: always let the Dancer pass.',at:37},
 };
 export const S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
 try{S.best=+localStorage.getItem('palm_best')||0}catch(e){}

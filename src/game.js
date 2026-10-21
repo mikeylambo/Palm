@@ -43,7 +43,7 @@ export function act(a){
   if(want==='early'||fig.empty&&a==='blast'){flinch();return}
   const ok=a===want;
   if(fig.empty){S.score+=50*S.combo;S.combo=Math.min(8,S.combo+1)}
-  else if(ok){S.score+=Math.round(100*S.combo+(rt<400?50:0)+(fig.type==='turncoat'&&fig.threat||fig.type==='sleeper'||fig.type==='dancer'?75:0));S.combo=Math.min(8,S.combo+1)}
+  else if(ok){S.score+=Math.round(100*S.combo+(rt<400?50:0)+(fig.type==='turncoat'&&fig.threat||fig.type==='sleeper'?75:0));S.combo=Math.min(8,S.combo+1)}
   else strike(a==='pass'?'ko':'flee');
   if(a==='blast'){S.heat=Math.min(1,S.heat+.25);}else{S.heat=Math.max(0,S.heat-.2);tone(300,.25,'sine',.14,200)}
   const good=fig.empty||ok,res=G.res={a,ok:good,t:now+(good?85:0),dur:a==='blast'?450+S.heat*350:650};
@@ -54,7 +54,7 @@ export const HITSTOP=75;
 export function update(t){
   const fig=G.fig;
   if(S.mode==='resolve'&&G.res.a==='blast'&&!G.res.stopped&&t>=G.res.t){G.res.stopped=true;G.stopUntil=t+HITSTOP}
-  if(S.mode==='lurk'&&t-G.t0>G.lurk){S.mode='beat';if(fig.type==='dancer'){const d=G.win/1000;tone(620,d,'sawtooth',.05,1500);tone(470,d,'square',.035,1150);tone(760,d,'triangle',.05,1800);buzz([30,30,30,30,60])}if(G.buffered){const b=G.buffered;G.buffered=null;act(b)}}
+  if(S.mode==='lurk'&&t-G.t0>G.lurk){S.mode='beat';if(G.buffered){const b=G.buffered;G.buffered=null;act(b)}}
   if(S.mode==='beat'){const k=(t-G.t0-G.lurk)/G.win;
     if(fig.type==='sleeper'&&!fig.woke&&k>=fig.openAt){fig.woke=true;G.shake=4}
     if(fig.type==='turncoat'&&fig.threat&&!fig.turned&&k>=fig.turnAt){fig.turned=true;G.shake=6}
