@@ -166,7 +166,7 @@ function act(a){
   else strike(want==='early'?(fig.type==='sleeper'?'WOKE IT EARLY':a==='blast'?'STRUCK AN INNOCENT':'TOO EARLY'):fig.type==='child'&&a==='blast'?'YOU BLASTED A CHILD':a==='blast'?'STRUCK A FRIEND':'IT GOT THROUGH',a==='pass'?'ko':'flee');
   if(a==='blast'){S.heat=Math.min(1,S.heat+.25);}else{S.heat=Math.max(0,S.heat-.2);tone(300,.25,'sine',.14,200)}
   const good=fig.empty?a!=='blast':ok;res={a,ok:good,t:now+(good?85:0),dur:a==='blast'?450+S.heat*350:650};
-  if(a==='blast'){res.shards=Array.from({length:26},()=>({x:(Math.random()-.5)*110,y:(Math.random()-.5)*130,v:.5+Math.random(),s:3+Math.random()*7,r:Math.random()*6,ink:Math.random()<.6}));setTimeout(kiBoom,Math.max(0,res.t-now))}S.mode='resolve';S.beat++;
+  if(a==='blast'){res.fx=Math.random()<.5?'fling':'crumble';res.shards=Array.from({length:26},()=>({x:(Math.random()-.5)*110,y:(Math.random()-.5)*130,v:.5+Math.random(),s:3+Math.random()*7,r:Math.random()*6,ink:Math.random()<.6}));setTimeout(kiBoom,Math.max(0,res.t-now))}S.mode='resolve';S.beat++;
 }
 
 function drawAura(cx,cy,col,t,alpha=1){
@@ -385,7 +385,7 @@ function frame(t){
       onl=f.threat?'horror':'joy';
     }else{
       const p=S.mode==='beat'?Math.min(1,(t-t0-lurk)/150):1;
-      drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1});g.restore();
+      drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else{g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}});g.restore();
       const seenFor=t-t0-lurk;
       onl=shiftMod==='NIGHT'?'sleep':f.type==='child'?'fear':(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
       if(S.mode==='resolve')onl=f.threat?'joy':'horror';
@@ -410,7 +410,7 @@ function frame(t){
     // hakai: instant. the face crumbles into ink flakes that drift up and dissolve into the white
     const q=(t-res.t)/res.dur,imp=SET.flashes&&q>=0&&q<.07;
     if(q>=0&&q<.15&&!imp){g.fillStyle=C.violet;g.globalAlpha=.5;poly(TOP);g.fill();g.globalAlpha=1}
-    if(q>=.03&&q<.75){const cq=(q-.03)/.72;g.save();poly(TOP);g.clip();
+    if(res.fx==='crumble'&&q>=.03&&q<.75){const cq=(q-.03)/.72;g.save();poly(TOP);g.clip();
       res.shards.forEach(sh=>{const a=Math.max(0,1-cq*1.3);if(!a)return;g.globalAlpha=a;g.save();g.translate(420+sh.x+cq*sh.v*60,230+sh.y-cq*sh.v*170);g.rotate(sh.r+cq*sh.v*3);const z=sh.s*(1-cq*.6);g.fillStyle=sh.ink?C.ink:'#fff';g.strokeStyle=C.ink;g.lineWidth=1.5;g.beginPath();g.moveTo(-z,-z*.4);g.lineTo(z*.7,-z*.8);g.lineTo(z,z*.5);g.lineTo(-z*.2,z*.7);g.closePath();g.fill();if(!sh.ink)g.stroke();g.restore()});
       g.restore();g.globalAlpha=1}
     let a=q<.15?Math.max(0,q)/.15:q<.55?1:Math.max(0,1-(q-.55)/.45);if(!SET.flashes)a*=.55;
@@ -465,7 +465,7 @@ function openPanel(kind){placeMenu();panelEl.textContent='';const h=document.cre
     [['music','Music volume'],['sfx','Sound effects']].forEach(([key,lab])=>{const l=document.createElement('label');l.textContent=lab;const r=document.createElement('input');r.type='range';r.min=0;r.max=1;r.step=.05;r.value=SET[key];r.id='set-'+key;r.oninput=()=>{SET[key]=+r.value;saveSet();if(key==='music')musicLevel();else tone(440,.08,'triangle',.12)};l.appendChild(r);panelEl.appendChild(l)});
     [['shake','Screen shake'],['flashes','Flashes'],['haptics','Vibration']].forEach(([key,lab])=>{const l=document.createElement('label');l.textContent=lab;const c=document.createElement('input');c.type='checkbox';c.checked=!!SET[key];c.id='set-'+key;c.onchange=()=>{SET[key]=c.checked;saveSet()};l.appendChild(c);panelEl.appendChild(l)});
   }else{h.textContent='CREDITS';
-    [['Game','mikeylambo'],['Music','mikeylambo']].forEach(([role,who])=>{const d=document.createElement('div');d.className='credit';const b=document.createElement('b');b.textContent=role;d.append(b,who);panelEl.appendChild(d)})}
+    [['Game','Mikey Lambo'],['Music','Mikey Lambo']].forEach(([role,who])=>{const d=document.createElement('div');d.className='credit';const b=document.createElement('b');b.textContent=role;d.append(b,who);panelEl.appendChild(d)})}
   const x=document.createElement('button');x.type='button';x.className='close';x.textContent='BACK';x.onclick=closePanel;panelEl.appendChild(x);
   panelEl.hidden=false;menuLinks.hidden=true;x.focus()}
 function closePanel(){panelEl.hidden=true;if(S.mode==='title'||S.mode==='over'){menuLinks.hidden=false;placeMenu()}}
