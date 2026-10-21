@@ -15,7 +15,14 @@ try{S.best=+localStorage.getItem('palm_best')||0}catch(e){}
 export const G={fig:null,t0:0,win:2200,lurk:0,res:null,card:null,shake:0,force:null,learnType:null,learnLeft:0,
   boil:0,boilT:0,paused:false,pauseAt:0,buffered:null,missT:-9999,missSeed:0,fallT:0,lastClassic:false,
   stopUntil:0,killer:null}; // stopUntil: hit-stop end time. killer: the arrival behind the run-ending mistake
-export const seen=new Set();
+export const seen=new Set(); // types met this run, in debut order
+// this run's unlock beats. The Lurker always comes first; once a player has met every type in some run,
+// the other specials take the remaining slots in a random order.
+export const AT={};
+export function dealOrder(){const keys=Object.keys(ROSTER),slots=keys.map(k=>ROSTER[k].at);let met=false;try{met=localStorage.getItem('palm_metall')==='1'}catch(e){}
+  const rest=keys.slice(2);if(met)for(let i=rest.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[rest[i],rest[j]]=[rest[j],rest[i]]}
+  [keys[0],keys[1],...rest].forEach((k,i)=>AT[k]=slots[i])}
+dealOrder();
 // the three onlookers are the lives
 export const OL=[{},{},{}].map(()=>({gone:0,kind:''}));
 export const SET={music:.7,sfx:.8,shake:true,flashes:true,haptics:true};try{Object.assign(SET,JSON.parse(localStorage.getItem("palm_settings")||"{}"))}catch(e){}

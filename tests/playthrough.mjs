@@ -59,6 +59,9 @@ const run=await page.evaluate(TYPES=>{
 },TYPES);
 console.log(`played to beat ${run.beat}, ${run.strikes} strikes`);
 for(const t of TYPES)check(run.seen.includes(t),`${t} appeared`);
+const order=await page.evaluate(()=>{let met=null;try{met=localStorage.getItem('palm_metall')}catch{}return {met,first:JSON.stringify(PALM.AT)}});
+check(order.first===JSON.stringify({wanderer:0,lurker:10,sleeper:16,twins:23,turncoat:30}),'first run uses the teaching order');
+check(order.met==='1','meeting every type unlocks shuffled orders');
 check(run.debutBeforeIntro.length===0,`every type debuted after its intro card${run.debutBeforeIntro.length?' (not: '+run.debutBeforeIntro+')':''}`);
 
 // 2. pause: P pauses, a held (repeating) P does not toggle it back, Esc resumes
@@ -105,6 +108,14 @@ check(over.killer,'the face that ended the run is kept for the slump');
 check(await page.isVisible('#btn-title'),'TITLE is offered at game over');
 await page.click('#btn-title');
 check(await page.evaluate(()=>PALM.S.mode)==='title','TITLE at game over returns to the title');
+
+// 6. after meeting everyone, later runs keep the Lurker first and shuffle the rest into the same slots
+const deals=await page.evaluate(()=>{const seenOrders=new Set();let lurkerFirst=true;
+  for(let i=0;i<30;i++){const key=k=>dispatchEvent(new KeyboardEvent('keydown',{key:k}));key(' ');__step(16);const a=PALM.AT;
+    if(a.wanderer!==0||a.lurker!==10)lurkerFirst=false;seenOrders.add([a.sleeper,a.twins,a.turncoat].join());document.getElementById('btn-title')?.click();PALM.S.mode!=='title'&&dispatchEvent(new KeyboardEvent('keydown',{key:'p'}));__step(16);document.getElementById('btn-title')?.click()}
+  return {lurkerFirst,orders:[...seenOrders]}});
+check(deals.lurkerFirst,'the Lurker always debuts first');
+check(deals.orders.length>1&&deals.orders.every(o=>o.split(',').sort().join()==='16,23,30'),'Sleeper, Twins and Turncoat shuffle into the 16/23/30 slots ('+deals.orders.length+' orders seen)');
 
 check(errors.length===0,'no console errors'+(errors.length?':\n    '+errors.join('\n    '):''));
 await browser.close();server.close();

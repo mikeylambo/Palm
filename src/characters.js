@@ -1,12 +1,12 @@
 // Characters: who arrives, how they look, and the right call for each.
-import {C,ROSTER,S,G,seen,R,RI,ramp} from './state.js';
+import {C,ROSTER,AT,S,G,seen,R,RI,ramp} from './state.js';
 
 // learn, then mix: right after a debut only the newcomer and the Wanderer come; after that, everyone
 // you've met, the two newest a little more often. A type only ever debuts through its intro card.
 export function pickType(){if(G.learnLeft>0)return Math.random()<.67?G.learnType:'wanderer';
-  const sp=Object.keys(ROSTER).filter(k=>k!=='wanderer'&&seen.has(k)),pool=['wanderer',...sp,...sp.slice(-2)];
+  const sp=[...seen].filter(k=>k!=='wanderer'),pool=['wanderer',...sp,...sp.slice(-2)];
   return pool[Math.floor(Math.random()*pool.length)]}
-export function freshType(){const e=Object.entries(ROSTER).find(([k,v])=>S.beat>=v.at&&!seen.has(k));return e&&e[0]}
+export function freshType(){return Object.keys(ROSTER).find(k=>S.beat>=AT[k]&&!seen.has(k))}
 
 const SKIN=['#ffffff','#f6ead8','#ead2b4','#d3ad87','#a87a56','#7d5539'];
 // procedural face; ~17% of the time (never twice in a row) the original v1 face instead

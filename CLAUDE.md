@@ -36,6 +36,8 @@ The game got better every time something was cut. Treat these as hard constraint
 | Twins | 23 | Two faces. Blast if either is a threat |
 | Turncoat | 30 | Violet aura (like Sleeper and Twins: violet = a special, watch the eyes), smiles; some turn 20–65% into the beat (always ~0.4 s left to blast). Moving before the turn = FLINCHED |
 
+Order: a player's first full run uses the table's order. Once they have met every type (`palm_metall` in localStorage), the Lurker still debuts at 10 and the Sleeper, Twins and Turncoat are dealt into the 16/23/30 slots at random each run (`dealOrder()` / `AT` in `state.js`).
+
 Cut on purpose: Mirror, The Masked, Herald, The Child, The Dancer. The roster ends at the Turncoat; no sixth type unless the owner asks. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often.
 
 ## Faces
@@ -54,7 +56,7 @@ Three onlookers (bowl cut, spiky, topknot). Letting a threat through knocks one 
 - `src/characters.js`: `pickType()`, `freshType()`, `newLook()`, `newFig()`, `correctAct()`
 - `src/game.js`: game flow: `startBeat()`, `spawn()`, `act()`, `update()`, `pause()`, `resume()`, `goTitle()`. Modes: `title`, `card`, `lurk`, `beat`, `resolve`, `fall`, `over`
 - `src/render.js`: all drawing, `draw()` plus the faces (`face()`; `L.classic` draws the v1 face). The blast effect is the block starting `// hakai`
-- `src/audio.js`: synthesized sfx (`tone()`, `kiBoom()`), haptics, music volume/ducking
+- `src/audio.js`: synthesized sfx (`tone()`, `kiBoom()`, plus the reaction cues `popIn()` on every arrival, a double pop for Twins; `eyesOpen()` when a Sleeper wakes; `turnSting()` when a Turncoat turns), haptics, music volume/ducking
 - `src/ui.js`: keys, buttons, swipes, pause button, menus (`openPanel()`, `closePanel()`, `showMenu()`, `#menu-links`)
 - `src/leaderboard.js`: shared Supabase project `leaderboards`, table `scores`, rows tagged `game: 'palm'` (same setup as `neonstriker/src/systems/online.js`). Publishable key is client-safe; RLS protects the table. There is also a `window.claude` db path used only when the game runs as a claude.ai artifact; it is inert on Vercel.
 - `tests/playthrough.mjs` (`npm test`): headless Playwright run on a seeded virtual clock; plays until every type appears, checks intro cards, pause keys, TITLE, game over and console errors. `.vercelignore` keeps tests and `package.json` out of the deploy, so Vercel stays a static site.

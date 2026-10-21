@@ -1,7 +1,7 @@
 // Game flow. Modes: title, card, lurk, beat, resolve, fall, over ('x' while a run starts).
-import {S,G,OL,seen,RI,ramp} from './state.js';
+import {ROSTER,S,G,OL,seen,RI,ramp,dealOrder} from './state.js';
 import {newFig,correctAct,freshType} from './characters.js';
-import {tone,buzz,kiBoom,startMusic} from './audio.js';
+import {tone,buzz,kiBoom,startMusic,popIn,eyesOpen,turnSting} from './audio.js';
 import {panelOpen,showMenu,hideMenu} from './ui.js';
 import {showBoard,hideBoard} from './leaderboard.js';
 
@@ -12,7 +12,7 @@ export function startBeat(){
 function maybeIntro(){
   // first time a character type appears, show its card
   const type=freshType();
-  if(type){seen.add(type);G.force=type;G.learnType=type;G.learnLeft=4;G.card={kind:'intro',type,t:performance.now()};S.mode='card';tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120);return true}
+  if(type){seen.add(type);if(seen.size===Object.keys(ROSTER).length)try{localStorage.setItem('palm_metall','1')}catch(e){}G.force=type;G.learnType=type;G.learnLeft=4;G.card={kind:'intro',type,t:performance.now()};S.mode='card';tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120);return true}
   return false;
 }
 export function spawn(){
@@ -30,7 +30,7 @@ export function spawn(){
 function strike(kind='flee'){const alive=OL.filter(o=>!o.gone);if(alive.length){const o=alive[RI(alive.length)];o.gone=performance.now();o.kind=kind}S.strikes++;if(S.strikes===3)G.killer=G.fig&&!G.fig.empty?G.fig:null;S.combo=1;G.shake=16;buzz([50,40,50]);G.missT=performance.now();G.missSeed=Math.random()*100;tone(70,.4,'square',.18,45)}
 export function act(a){
   const now=performance.now();if(panelOpen())return;
-  if(S.mode==='title'||S.mode==='over'){hideBoard();hideMenu();startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0});G.killer=null;G.learnLeft=0;seen.clear();startBeat();return}
+  if(S.mode==='title'||S.mode==='over'){hideBoard();hideMenu();startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0});G.killer=null;G.learnLeft=0;seen.clear();dealOrder();startBeat();return}
   if(G.paused){resume();return}
   const fig=G.fig;
   if(S.mode==='card'&&G.card.kind==='intro'&&now-G.card.t>500){spawn();return}
@@ -54,10 +54,10 @@ export const HITSTOP=75;
 export function update(t){
   const fig=G.fig;
   if(S.mode==='resolve'&&G.res.a==='blast'&&!G.res.stopped&&t>=G.res.t){G.res.stopped=true;G.stopUntil=t+HITSTOP}
-  if(S.mode==='lurk'&&t-G.t0>G.lurk){S.mode='beat';if(G.buffered){const b=G.buffered;G.buffered=null;act(b)}}
+  if(S.mode==='lurk'&&t-G.t0>G.lurk){S.mode='beat';if(!fig.empty)popIn(fig.type==='twins');if(G.buffered){const b=G.buffered;G.buffered=null;act(b)}}
   if(S.mode==='beat'){const k=(t-G.t0-G.lurk)/G.win;
-    if(fig.type==='sleeper'&&!fig.woke&&k>=fig.openAt){fig.woke=true;G.shake=4}
-    if(fig.type==='turncoat'&&fig.threat&&!fig.turned&&k>=fig.turnAt){fig.turned=true;G.shake=6}
+    if(fig.type==='sleeper'&&!fig.woke&&k>=fig.openAt){fig.woke=true;G.shake=4;eyesOpen()}
+    if(fig.type==='turncoat'&&fig.threat&&!fig.turned&&k>=fig.turnAt){fig.turned=true;G.shake=6;turnSting()}
     if(fig.empty&&k>.55){S.score+=50*S.combo;S.combo=Math.min(8,S.combo+1);G.res={a:'none',ok:true,t,dur:350};S.mode='resolve';S.beat++}
     else if(k>1)act('pass')}
   if(S.mode==='resolve'&&t-G.res.t>G.res.dur){if(S.strikes>=3){S.mode='fall';G.fallT=t;tone(110,1.1,'sine',.2,40)}else startBeat()}

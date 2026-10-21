@@ -1,5 +1,5 @@
 // PALM entry point: wires the modules and runs the main loop.
-import {S,G} from './state.js';
+import {S,G,AT} from './state.js';
 import {update} from './game.js';
 import {draw} from './render.js';
 import './ui.js';
@@ -15,4 +15,4 @@ function frame(t){
 }
 requestAnimationFrame(frame);
 // read-only hook for the headless tests
-window.PALM={get S(){return S},get G(){return G},get fig(){return G.fig}};
+window.PALM={get S(){return S},get G(){return G},get fig(){return G.fig},get AT(){return AT}};
