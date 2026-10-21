@@ -40,14 +40,16 @@ Three onlookers (bowl cut, spiky, topknot). Letting a threat through knocks one 
 
 ## Code layout
 
-Everything is in `index.html` (canvas game, one inline script). Key areas, in order:
+`index.html` holds the markup and CSS and loads `src/main.js` as an ES module (serve over http; `file://` will not load modules). Modules:
 
-- `ROSTER`, `newLook()`, `newFig()`: characters and procedural faces (`face()`; `L.classic` draws the v1 face)
-- `startBeat()`, `spawn()`, `act()`, `correctAct()`: game flow. Modes: `title`, `card`, `lurk`, `beat`, `resolve`, `fall`, `over`
-- `frame()`: main loop and all drawing; blast effect is the block starting `// hakai`
-- `SET` + `saveSet()`: settings (music, sfx, shake, flashes, haptics) in localStorage
-- Menus: `openPanel()`, `closePanel()`, `#menu-links`, `#btn-pause`
-- Leaderboard: shared Supabase project `leaderboards`, table `scores`, rows tagged `game: 'palm'` (same setup as `neonstriker/src/systems/online.js`). Publishable key is client-safe; RLS protects the table. There is also a `window.claude` db path used only when the game runs as a claude.ai artifact; it is inert on Vercel.
+- `src/state.js`: constants (`C`, `TOP`, `BOT`, `ROSTER`), shared state (`S` for score/mode, `G` for timing and the current arrival, `seen`, `OL` onlookers), `SET` + `saveSet()` settings (music, sfx, shake, flashes, haptics) in localStorage
+- `src/characters.js`: `pickType()`, `freshType()`, `newLook()`, `newFig()`, `correctAct()`
+- `src/game.js`: game flow: `startBeat()`, `spawn()`, `act()`, `update()`, `pause()`, `resume()`, `goTitle()`. Modes: `title`, `card`, `lurk`, `beat`, `resolve`, `fall`, `over`
+- `src/render.js`: all drawing, `draw()` plus the faces (`face()`; `L.classic` draws the v1 face). The blast effect is the block starting `// hakai`
+- `src/audio.js`: synthesized sfx (`tone()`, `kiBoom()`), haptics, music volume/ducking
+- `src/ui.js`: keys, buttons, swipes, pause button, menus (`openPanel()`, `closePanel()`, `showMenu()`, `#menu-links`)
+- `src/leaderboard.js`: shared Supabase project `leaderboards`, table `scores`, rows tagged `game: 'palm'` (same setup as `neonstriker/src/systems/online.js`). Publishable key is client-safe; RLS protects the table. There is also a `window.claude` db path used only when the game runs as a claude.ai artifact; it is inert on Vercel.
+- `src/main.js`: main loop (`frame()`), plus a read-only `window.PALM` hook used by the tests
 - Music: `<audio id="bgm" src="music.mp3">`. Drop `music.mp3` in the repo root. It loops, follows the volume slider, and ducks during the Lurker wait, pause and the game-over slump.
 
 ## Known bugs (fix these first)

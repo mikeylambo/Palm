@@ -1,0 +1,23 @@
+// Shared constants and mutable game state. Scalars live on G so every module sees the same values.
+export const C={paper:'#eef59a',ink:'#111014',violet:'#7b5bd6',threat:'#e0304a',grace:'#e2a92b',dim:'#55534a'};
+export const TOP=[[175,60],[580,40],[580,440],[205,480]], BOT=[[250,520],[580,478],[580,780],[285,780]];
+export const ROSTER={
+  wanderer:{name:'WANDERER',tip:'Read the aura, then the eyes.',at:0},
+  lurker:{name:'LURKER',tip:'A shadow that sometimes never comes. Do not flinch.',at:10},
+  sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Acting first is a strike.',at:16},
+  herald:{name:'HERALD',tip:'Carries a sealed scroll. Always let a Herald pass, whatever its aura.',at:23},
+  twins:{name:'TWINS',tip:'Two faces, one verdict. Blast if either one is a threat.',at:29},
+  turncoat:{name:'TURNCOAT',tip:'Smiles at first. Wait: some turn. Strike too early and you strike an innocent.',at:35},
+  child:{name:'THE CHILD',tip:'Scary aura, screaming crowd. Always let the Child pass. The crowd is wrong.',at:40},
+};
+export const S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
+try{S.best=+localStorage.getItem('palm_best')||0}catch(e){}
+// fig: current arrival. t0/lurk/win: beat timing (ms). res: last verdict being animated. card: intro/rule card.
+export const G={fig:null,t0:0,win:2200,lurk:0,res:null,card:null,shake:0,rule:null,ruleLeft:0,force:null,
+  boil:0,boilT:0,paused:false,pauseAt:0,buffered:null,missT:-9999,missSeed:0,fallT:0,lastClassic:false};
+export const seen=new Set();
+// the three onlookers are the lives
+export const OL=[{},{},{}].map(()=>({gone:0,kind:''}));
+export const SET={music:.7,sfx:.8,shake:true,flashes:true,haptics:true};try{Object.assign(SET,JSON.parse(localStorage.getItem("palm_settings")||"{}"))}catch(e){}
+export function saveSet(){try{localStorage.setItem("palm_settings",JSON.stringify(SET))}catch(e){}}
+export const R=(a,b)=>a+Math.random()*(b-a),RI=n=>Math.floor(Math.random()*n);
