@@ -110,6 +110,30 @@ function drawShadow(t,p,tw=0){
   g.strokeStyle=C.ink;g.lineWidth=1;for(let i=0;i<18;i++){const y=60+i*24+j(i)*8;g.beginPath();g.moveTo(580,y);g.lineTo(580-40-p*140-(i%3)*20,y+4);g.stroke()}
   g.restore();
 }
+// the guardian's right hand, raised toward the arrival, seen from behind: a plain back of the hand, thumb on the left. The sleeve meets a cuff that wraps the wrist at the forearm's angle.
+// the raised hand's outline (wrist at the origin, fingers up): thumb on the left, four fingers
+const FINGERS=[33,40,38,29],J=k=>j(k)*1.6;
+function handPath(){g.beginPath();g.moveTo(-16,14);
+  g.lineTo(-19+J(1),-10);g.quadraticCurveTo(-30,-16,-36+J(2),-30);g.quadraticCurveTo(-38,-38,-31,-37);g.quadraticCurveTo(-25,-34,-20,-30); // thumb
+  g.lineTo(-20+J(3),-40);
+  for(let i=0;i<4;i++){const x0=-20+i*10,x1=x0+9.5,top=-40-FINGERS[i]+J(10+i);g.lineTo(x0,top+4);g.quadraticCurveTo(x0+4.75,top-3,x1,top+4);g.lineTo(x1,-42+(i<3?2:0))}
+  g.lineTo(20+J(4),-36);g.quadraticCurveTo(21,-12,18,14);g.closePath();}
+function drawHand(px,py){
+  const wx=px-22,wy=py+50,a=Math.atan2(wy-440,wx-185),ux=Math.cos(a),uy=Math.sin(a),nx=-uy,ny=ux; // forearm direction u, across n
+  const cw=27,ct=18,bx=wx-ux*ct,by=wy-uy*ct; // cuff half-width, thickness; back edge centre
+  const tilt=.1+a+.896; // the hand turns with the forearm: upright at rest, tipped forward on the thrust, hanging in the slump
+  // combo glow first, untrimmed; the sleeve, the trimmed hand and the cuff then draw over its base
+  if(S.combo>1){g.save();g.translate(wx,wy);g.rotate(tilt);g.scale(1.3,1.3);g.shadowColor=C.violet;g.shadowBlur=S.combo*5;g.fillStyle='#d8d4e6';handPath();g.fill();g.restore()}
+  // sleeve: shoulder to the cuff's back edge
+  g.fillStyle='#b7b3c9';g.beginPath();g.moveTo(140,470);g.quadraticCurveTo(180,400,bx-nx*cw,by-ny*cw);g.lineTo(bx+nx*cw,by+ny*cw);g.quadraticCurveTo(210,470,170,510);g.closePath();g.fill();g.stroke();
+  // the hand: upright, a touch of tilt, trimmed along the cuff's front edge so its base always tucks under it
+  g.save();g.beginPath();g.moveTo(wx+nx*200-ux*4,wy+ny*200-uy*4);g.lineTo(wx-nx*200-ux*4,wy-ny*200-uy*4);g.lineTo(wx-nx*200+ux*300,wy-ny*200+uy*300);g.lineTo(wx+nx*200+ux*300,wy+ny*200+uy*300);g.closePath();g.clip();
+  g.translate(wx,wy);g.rotate(tilt);g.scale(1.3,1.3);g.lineWidth=4/1.3;
+  g.fillStyle='#d8d4e6';handPath();g.fill();g.stroke();
+  g.restore();g.lineWidth=4;
+  // cuff on top, wrapping the wrist across the forearm
+  g.fillStyle=C.grace;g.beginPath();g.moveTo(bx+nx*cw,by+ny*cw);g.lineTo(wx+nx*(cw+1),wy+ny*(cw+1));g.lineTo(wx-nx*(cw+1),wy-ny*(cw+1));g.lineTo(bx-nx*cw,by-ny*cw);g.closePath();g.fill();g.stroke();
+  g.lineWidth=2;g.beginPath();const mx=(bx+wx)/2,my=(by+wy)/2;g.moveTo(mx+nx*cw,my+ny*cw);g.lineTo(mx-nx*cw,my-ny*cw);g.stroke();g.lineWidth=4}
 function drawGuardian(push,slump=0){
   // the original masked figure, no halo
   layer(40,()=>{
@@ -125,11 +149,7 @@ function drawGuardian(push,slump=0){
   g.fillStyle='#d8d4e6';g.beginPath();g.ellipse(115-hd*.3,400+hd,48,58,.1+slump*.3,0,7);g.fill();g.stroke();
   g.fillStyle=C.ink;g.beginPath();g.moveTo(80-hd*.3,395+hd*1.2);g.lineTo(150-hd*.3,385+hd*1.4);g.lineTo(148-hd*.3,400+hd*1.4);g.lineTo(82-hd*.3,410+hd*1.2);g.fill();
   const px=255+push-slump*70,py=330+slump*190;
-  g.fillStyle='#b7b3c9';g.beginPath();g.moveTo(140,470);g.quadraticCurveTo(190,400,px-30,py+20);g.lineTo(px-20,py+55);g.quadraticCurveTo(200,470,170,510);g.closePath();g.fill();g.stroke();
-  g.fillStyle=C.grace;g.fillRect(px-40,py+10,16,48);g.strokeRect(px-40,py+10,16,48);
-  g.save();if(S.combo>1){g.shadowColor=C.violet;g.shadowBlur=S.combo*5}
-  g.fillStyle='#d8d4e6';g.beginPath();g.moveTo(px-24,py+60);g.lineTo(px-22,py-30);for(let i=0;i<4;i++){g.lineTo(px-18+i*10,py-48+Math.abs(i-1.5)*8);g.lineTo(px-12+i*10,py-20)}g.lineTo(px+20,py+50);g.closePath();g.fill();g.stroke();
-  g.restore();
+drawHand(px,py);
   });
 }
 function drawOnlookers(state){
