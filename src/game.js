@@ -12,7 +12,7 @@ export function startBeat(){
 function maybeIntro(){
   // first time a character type appears, show its card
   const type=freshType();
-  if(type){seen.add(type);if(seen.size===Object.keys(ROSTER).length)try{localStorage.setItem('palm_metall','1')}catch(e){}G.force=type;G.learnType=type;G.learnLeft=4;G.card={kind:'intro',type,t:performance.now()};S.mode='card';introSound();return true}
+  if(type){seen.add(type);if(seen.size===Object.keys(ROSTER).length)try{localStorage.setItem('palm_metall','1')}catch(e){}G.force=type;G.learnType=type;G.learnLeft=3;G.card={kind:'intro',type,t:performance.now()};S.mode='card';introSound();return true}
   return false;
 }
 export function spawn(){

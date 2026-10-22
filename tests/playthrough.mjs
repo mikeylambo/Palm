@@ -44,18 +44,20 @@ await page.waitForFunction(()=>window.PALM&&window.__step);
 // 1. play well until every type has shown up
 const run=await page.evaluate(TYPES=>{
   const P=window.PALM,key=k=>dispatchEvent(new KeyboardEvent('keydown',{key:k}));
-  const seen=new Set(),intros=[],debutBeforeIntro=[];let acted=null,lastCard=null;
+  const seen=new Set(),intros=[],debutBeforeIntro=[],seq=[];let acted=null,lastCard=null,lastFig=null;
   for(let f=0;f<60000&&seen.size<TYPES.length;f++){__step(1000/60);
     const S=P.S,G=P.G,fig=P.fig,now=performance.now();
     if(S.mode==='title'){if(f%30===0)key(' ');continue}
     if(S.mode==='card'){if(G.card!==lastCard){lastCard=G.card;if(G.card.kind==='intro')intros.push(G.card.type)}if(f%40===0)key('ArrowLeft');continue}
+    if(fig&&fig!==lastFig){lastFig=fig;seq.push(fig.type)}
     if(fig&&!seen.has(fig.type)){seen.add(fig.type);if(!intros.includes(fig.type))debutBeforeIntro.push(fig.type)}
     if(S.mode==='beat'&&fig&&acted!==fig){const k=(now-G.t0-G.lurk)/G.win;
       const wait=fig.type==='sleeper'?fig.openAt+.05:fig.type==='turncoat'?fig.turnAt+.05:fig.type==='twins'?fig.secondAt+.05:.1;
       if(fig.empty)continue; // an empty lurk resolves itself
       if(k>wait){acted=fig;const a=fig.threat?'blast':'pass';key(a==='blast'?' ':'ArrowLeft')}}
   }
-  return {seen:[...seen],intros,debutBeforeIntro,beat:P.S.beat,strikes:P.S.strikes,mode:P.S.mode};
+  const runs=intros.slice(1).filter(t=>{const i=seq.indexOf(t);return i>=0&&i+3<=seq.length&&seq.slice(i,i+3).some(x=>x!==t)});
+  return {seen:[...seen],intros,debutBeforeIntro,runs,beat:P.S.beat,strikes:P.S.strikes,mode:P.S.mode};
 },TYPES);
 console.log(`played to beat ${run.beat}, ${run.strikes} strikes`);
 await page.waitForFunction(()=>PALM.sfx>=16,null,{timeout:5000}).catch(()=>{});
@@ -64,6 +66,7 @@ for(const t of TYPES)check(run.seen.includes(t),`${t} appeared`);
 const order=await page.evaluate(()=>{let met=null;try{met=localStorage.getItem('palm_metall')}catch{}return {met,first:JSON.stringify(PALM.AT)}});
 check(order.first===JSON.stringify({wanderer:0,lurker:10,sleeper:16,twins:23,turncoat:30}),'first run uses the teaching order');
 check(order.met==='1','meeting every type unlocks shuffled orders');
+check(run.runs.length===0,'each debut comes three in a row'+(run.runs.length?' (not: '+run.runs+')':''));
 check(run.debutBeforeIntro.length===0,`every type debuted after its intro card${run.debutBeforeIntro.length?' (not: '+run.debutBeforeIntro+')':''}`);
 
 // 2. pause: P pauses, a held (repeating) P does not toggle it back, Esc resumes

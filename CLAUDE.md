@@ -41,7 +41,7 @@ The game got better every time something was cut. Treat these as hard constraint
 
 Order: a player's first full run uses the table's order. Once they have met every type (`palm_metall` in localStorage), the Lurker still debuts at 10 and the Sleeper, Twins and Turncoat are dealt into the 16/23/30 slots at random each run (`dealOrder()` / `AT` in `state.js`).
 
-Cut on purpose: Mirror, The Masked, Herald, The Child, The Dancer. The roster ends at the Turncoat; no sixth type unless the owner asks. Pacing is learn, then mix: after each debut, only the newcomer and the Wanderer appear for about 4 beats; then everyone met so far mixes in, the two newest a bit more often.
+Cut on purpose: Mirror, The Masked, Herald, The Child, The Dancer. The roster ends at the Turncoat; no sixth type unless the owner asks. Pacing is learn, then mix: each debut is followed by two more of the newcomer (three in a row, no disguises or extra shadows); then everyone met so far mixes in, the two newest a bit more often.
 
 ## Faces
 

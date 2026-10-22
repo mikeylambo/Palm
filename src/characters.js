@@ -1,9 +1,9 @@
 // Characters: who arrives, how they look, and the right call for each.
 import {C,ROSTER,AT,S,G,seen,R,RI,ramp} from './state.js';
 
-// learn, then mix: right after a debut only the newcomer and the Wanderer come; after that, everyone
+// learn, then mix: a debut is followed by two more of the newcomer (three in a row); after that, everyone
 // you've met, the two newest a little more often. A type only ever debuts through its intro card.
-export function pickType(){if(G.learnLeft>0)return Math.random()<.67?G.learnType:'wanderer';
+export function pickType(){if(G.learnLeft>0)return G.learnType;
   const sp=[...seen].filter(k=>k!=='wanderer'),pool=['wanderer',...sp,...sp.slice(-2)];
   return pool[Math.floor(Math.random()*pool.length)]}
 export function freshType(){return Object.keys(ROSTER).find(k=>S.beat>=AT[k]&&!seen.has(k))}
