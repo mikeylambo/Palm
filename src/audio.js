@@ -6,7 +6,7 @@ export function buzz(p){if(!SET.haptics)return;try{navigator.vibrate&&navigator.
 
 // the owner's sound files (sfx/*.mp3, cut and levelled from their picks), decoded up front so cues play with no lag.
 // Until a file has loaded (or if it fails) each cue falls back to its synthesized version.
-const NAMES=['pop','pop2','eyes_open','turn','shadow','nothing','pass','flinch','strike','ko','flee','combo','intro','slump','gameover','click'],BUF={};
+const NAMES=['pop','pop2','eyes_open','turn','shadow','nothing','flinch','strike','ko','flee','combo','slump','gameover','click'],BUF={};
 function loadSfx(){NAMES.forEach(n=>fetch('sfx/'+n+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,no)=>ac.decodeAudioData(b,ok,no))).then(d=>{BUF[n]=d}).catch(()=>{}))}
 export const sfxLoaded=()=>Object.keys(BUF).length;
 function sfx(name,vol=1,rate=1,offset=0,at=0){try{ctx();const b=BUF[name];if(!b)return null;const s=ac.createBufferSource(),gn=ac.createGain();s.buffer=b;s.playbackRate.value=rate;gn.gain.value=vol*SET.sfx;s.connect(gn).connect(ac.destination);s.start(ac.currentTime+at,offset);return{s,gn}}catch(e){return null}}
@@ -20,12 +20,12 @@ export function popIn(){if(!sfx('pop',1,.93+Math.random()*.14)){const f=760+Math
 export function popSecond(){if(!sfx('pop2',1,.95+Math.random()*.1))tone(1100,.07,'triangle',.11,500)} // the second Twin
 export function eyesOpen(){if(!sfx('eyes_open')){tone(1480,.05,'triangle',.12);setTimeout(()=>tone(1980,.06,'triangle',.1),35)}}
 export function turnSting(){buzz(25);if(!sfx('turn')){tone(233,.28,'sawtooth',.09,170);tone(247,.28,'square',.06,180)}}
-export function passSound(){if(!sfx('pass'))tone(300,.25,'sine',.14,200)}
+export function passSound(){tone(300,.25,'sine',.14,200)}
 export function flinchSound(){if(!sfx('flinch'))tone(140,.2,'square',.12)}
 export function strikeSound(kind,thud=true){if(thud&&!sfx('strike'))tone(70,.4,'square',.18,45);sfx(kind==='ko'?'ko':'flee',.9)}
 export function nothingSound(){sfx('nothing')}
 export function comboSound(){if(!sfx('combo')){tone(660,.1,'triangle',.1);setTimeout(()=>tone(990,.15,'triangle',.1),90)}}
-export function introSound(){if(!sfx('intro')){tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120)}}
+export function introSound(){tone(523,.12,'triangle',.1);setTimeout(()=>tone(784,.2,'triangle',.1),120)}
 export function slumpSound(){if(!sfx('slump'))tone(110,1.1,'sine',.2,40)}
 export function gameoverSound(){sfx('gameover')}
 export function click(){if(!sfx('click'))tone(440,.08,'triangle',.12)}
@@ -36,17 +36,12 @@ export function shadowStart(ms){shadowStop();if(!BUF.shadow)return;const len=BUF
   const off=Math.max(0,len-s),at=Math.max(0,s-len);drone=sfx('shadow',.9,1,off,at);if(drone){const t=ac.currentTime+end;drone.gn.gain.setValueAtTime(.9*SET.sfx,t-.02);drone.gn.gain.linearRampToValueAtTime(0,t);drone.s.stop(t+.01)}}
 export function shadowStop(){if(drone){try{drone.s.stop()}catch(e){}drone=null}}
 
-// music: music.mp3 in the repo root, looping. It ducks while you wait (a shadow, a nap), during pause and the slump,
-// and drops to silence for the last split second before a reveal you are waiting on (never before a Turncoat's turn: that would give it away).
+// music: music.mp3 in the repo root, looping. It plays at full level through play (no ducking while you wait);
+// it only drops during pause and the game-over slump.
 const bgm=document.getElementById('bgm');let mg=null;
 function hookMusic(){try{const src=ac.createMediaElementSource(bgm);mg=ac.createGain();src.connect(mg).connect(ac.destination);bgm.volume=1}catch(e){mg=null}}
 export function startMusic(){try{ctx();if(bgm.paused)bgm.play().catch(()=>{})}catch(e){}musicLevel()}
-export function musicLevel(t=performance.now()){
-  const f=G.fig;let lv=1;
-  if(G.paused||S.mode==='fall')lv=.25;
-  else if(S.mode==='lurk'){lv=.25;if(G.t0+G.lurk-t<CUT*1000)lv=0}
-  else if(S.mode==='beat'&&f){const ms=t-G.t0-G.lurk,open=f.type==='sleeper'?f.openAt*G.win:f.type==='twins'?f.secondAt*G.win:0;
-    if(ms<open){lv=.25;if(open-ms<CUT*1000)lv=0}}
-  const v=SET.music*lv;
-  try{if(mg)mg.gain.setTargetAtTime(v,ac.currentTime,lv===0?.008:.04);else bgm.volume=v}catch(e){}
+export function musicLevel(){
+  const v=SET.music*(G.paused||S.mode==='fall'?.25:1);
+  try{if(mg)mg.gain.setTargetAtTime(v,ac.currentTime,.04);else bgm.volume=v}catch(e){}
 }
