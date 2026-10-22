@@ -172,6 +172,8 @@ function wrapText(s,x,y,w,lh){g.font='20px "Zen Kaku Gothic New",sans-serif';g.t
 function drawKiller(t){const f=G.killer,a=Math.min(1,(t-G.fallT)/400);
   drawAura(420,230,f.aura,t,a);g.save();g.globalAlpha=a;poly(TOP);g.clip();
   layer(1,()=>drawFig({...f,react:null,look:{...f.look,bob:0}},420,230,.95,1));g.restore()}
+// the only words in play: BLASTED or PASSED for a right call; any mistake is STRIKE! with one ! per strike so far
+function verdict(res,word,col){if(res.ok)txt(word,300,420,90,col);else txt('STRIKE'+'!'.repeat(Math.min(3,Math.max(1,res.n))),300,420,90,C.threat)}
 export function draw(t){
   const fig=G.fig,res=G.res,card=G.card,t0=G.t0,lurk=G.lurk,win=G.win;
   g.save();if(G.shake>0&&!SET.shake)G.shake=0;if(G.shake>0){g.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);G.shake*=.85;if(G.shake<.5)G.shake=0}
@@ -220,10 +222,10 @@ export function draw(t){
       g.restore();g.globalAlpha=1}
     let a=q<.15?Math.max(0,q)/.15:q<.55?1:Math.max(0,1-(q-.55)/.45);if(!SET.flashes)a*=.55;
     g.fillStyle=`rgba(255,255,255,${a*.85})`;g.fillRect(-20,-20,640,840);
-    if(q>.2&&q<.7)txt('BLASTED',300,420,90,C.violet);
+    if(q>.2&&q<.7)verdict(res,'BLASTED',C.violet);
   }
-  if(S.mode==='resolve'&&res.a==='pass'&&(t-res.t)<550)txt('PASSED',300,420,90,C.dim);
-  if(S.mode==='resolve'&&res.a==='flinch'&&(t-res.t)<500)txt('FLINCHED',300,420,90,C.threat);
+  if(S.mode==='resolve'&&res.a==='pass'&&(t-res.t)<550)verdict(res,'PASSED',C.dim);
+  if(S.mode==='resolve'&&res.a==='flinch'&&(t-res.t)<500)verdict(res,'',C.threat);
   if(S.mode==='card'){
     {const r=ROSTER[card.type];g.fillStyle='rgba(17,16,20,.86)';g.fillRect(0,250,600,300);
       txt('NEW ARRIVAL',300,300,28,C.grace);txt(r.name,300,370,72,C.paper);g.fillStyle=C.paper;wrapText(r.tip,300,420,480,28);

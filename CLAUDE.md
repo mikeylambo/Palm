@@ -13,7 +13,7 @@ Ask the owner before changing how the game plays or looks. Feel words: raw, inte
 The game got better every time something was cut. Treat these as hard constraints:
 
 - **Less is more.** Do not add new characters, rule types, cards, banners, text, shifts, daily runs, unlocks or cosmetics unless asked.
-- **On-screen words during play:** only `BLASTED`, `PASSED`, `FLINCHED` (big, centered). FLINCHED = any move made too early: at a shadow, at empty air, at shut eyes, before a turn. No other feedback text.
+- **On-screen words during play:** only `BLASTED` and `PASSED` for right calls, and `STRIKE!` for every mistake of any kind (a wrong blast, a threat let through, a move made too early at a shadow, empty air, shut eyes, before a turn or before the second Twin), with one `!` per strike so far: `STRIKE!`, `STRIKE!!`, `STRIKE!!!` and the slump. Big, centered, no other feedback text. The onlookers keep their tell: a threat let through knocks one out, any other mistake makes one flee. FLINCHED was retired (playtest 10/22).
 - **The clock holds:** reaction window warms up from 2.2 s (−55 ms per beat) and then stays at 1.2 s. No steady speed-up; tension comes from the characters' timing (shadow waits, naps, late turns). Still being tuned with the owner; the design doc's tempo steps are an open option.
 - **Arrivals pop in instantly,** except the Lurker and, once the Lurker is known, a growing share of anyone you've met (0% at beat 10 → 30% at 25 → 45% at 60), who come out of the shadow. The shadow's random wait widens 0.5 s → 1.7 s (beat 20) → 2.1 s (beat 45). All ramps use `ramp()` in `state.js` and keep climbing slowly past the last debut so long runs don't plateau. Only the Lurker can turn out to be nothing.
 - **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size.
@@ -34,10 +34,10 @@ The game got better every time something was cut. Treat these as hard constraint
 | Character | Beat | Rule |
 | --- | --- | --- |
 | Wanderer | 0 | Watch the eyes. The aura can lie (intro card says exactly this) |
-| Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = FLINCHED |
-| Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = FLINCHED |
-| Twins | 23 | Two faces; the second pops in 0.2–1.1 s after the first. Moving before both show = FLINCHED. Then blast if either is a threat. Onlookers stay tense until both show |
-| Turncoat | 30 | Violet aura (like Sleeper and Twins: violet = a special, watch the eyes), smiles; some turn 20–65% into the beat (always ~0.4 s left to blast). Moving before the turn = FLINCHED |
+| Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = a strike |
+| Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = a strike |
+| Twins | 23 | Two faces; the second pops in 0.2–1.1 s after the first. Moving before both show = a strike. Then blast if either is a threat. Onlookers stay tense until both show |
+| Turncoat | 30 | Violet aura (like Sleeper and Twins: violet = a special, watch the eyes), smiles; some turn 20–65% into the beat (always ~0.4 s left to blast). Moving before the turn = a strike |
 
 Order: a player's first full run uses the table's order. Once they have met every type (`palm_metall` in localStorage), the Lurker still debuts at 10 and the Sleeper, Twins and Turncoat are dealt into the 16/23/30 slots at random each run (`dealOrder()` / `AT` in `state.js`).
 

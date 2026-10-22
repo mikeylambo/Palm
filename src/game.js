@@ -41,8 +41,8 @@ export function act(a){
   const fig=G.fig;
   if(S.mode==='card'&&G.card.kind==='intro'&&now-G.card.t>500){spawn();return}
   if(S.mode==='lurk'&&G.t0+G.lurk-now<=80){G.buffered=a;return}
-  // FLINCHED: any move made too early (at a shadow, at empty air, at shut eyes, before a turn)
-  const flinch=()=>{shadowStop();strike('flee',false);flinchSound();G.res={a:'flinch',ok:false,t:now,dur:500,lurk:S.mode==='lurk'};S.mode='resolve';S.beat++};
+  // a move made too early (at a shadow, at empty air, at shut eyes, before a turn) is a strike like any other mistake
+  const flinch=()=>{shadowStop();strike('flee',false);flinchSound();G.res={a:'flinch',ok:false,n:S.strikes,t:now,dur:500,lurk:S.mode==='lurk'};S.mode='resolve';S.beat++};
   if(S.mode==='lurk'){flinch();return}
   if(S.mode!=='beat')return;
   const rt=now-G.t0-G.lurk,k=rt/G.win,want=correctAct(fig,k);
@@ -54,7 +54,7 @@ export function act(a){
   else if(ok){S.score+=Math.round(100*S.combo+(rv<400?50:0)+(fig.type==='turncoat'&&fig.threat||fig.type==='sleeper'||fig.type==='twins'?75:0));comboUp()}
   else strike(a==='pass'?'ko':'flee');
   if(a==='blast'){S.heat=Math.min(1,S.heat+.25);}else{S.heat=Math.max(0,S.heat-.2);passSound()}
-  const good=fig.empty||ok,res=G.res={a,ok:good,snap,t:now+(good?85:0),dur:a==='blast'?450+S.heat*350:650};
+  const good=fig.empty||ok,res=G.res={a,ok:good,n:S.strikes,snap,t:now+(good?85:0),dur:a==='blast'?450+S.heat*350:650};
   if(a==='blast'){res.fx=['fling','crumble','cover'][Math.floor(Math.random()*3)];res.shards=Array.from({length:26},()=>({x:(Math.random()-.5)*110,y:(Math.random()-.5)*130,v:.5+Math.random(),s:3+Math.random()*7,r:Math.random()*6,ink:Math.random()<.6}));setTimeout(()=>kiBoom(snap),Math.max(0,res.t-now))}S.mode='resolve';S.beat++;
 }
 // per-frame game logic (skipped while paused)
