@@ -10,12 +10,16 @@ const wrapEl=document.getElementById('wrap'),pauseBtn=document.getElementById('b
 export const panelOpen=()=>!panelEl.hidden;
 
 // ---------- input ----------
+// drawn icons, not text: iPhones render the ▶ character as a blue emoji
+const ICON={pause:'<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="4" y="3" width="4.5" height="14" fill="currentColor"/><rect x="11.5" y="3" width="4.5" height="14" fill="currentColor"/></svg>',play:'<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5 3 L17 10 L5 17 Z" fill="currentColor"/></svg>'};
+function pauseIcon(p){const k=p?'play':'pause';if(pauseBtn.dataset.icon!==k){pauseBtn.dataset.icon=k;pauseBtn.innerHTML=ICON[k];pauseBtn.setAttribute('aria-label',p?'Resume':'Pause')}}
+pauseIcon(false);
 pauseBtn.onclick=()=>{G.paused?resume():pause();pauseBtn.blur()};
 // pause keys: ignore auto-repeat (holding P toggled it back off), KeyP on any layout, capture phase so nothing else eats it
 addEventListener('keydown',e=>{if(e.repeat||!panelEl.hidden||e.target.tagName==='INPUT')return;if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.code==='KeyP'||e.key==='Pause'){e.preventDefault();G.paused?resume():pause()}},true);
 // game buttons never take focus, so keys always reach the game and Space never double-fires a focused button
 [pauseBtn,blastBtn,passBtn].forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
-setInterval(()=>{const on=playing()&&panelEl.hidden;pauseBtn.hidden=!on;if(on){const w=wrapEl.getBoundingClientRect(),c=cv.getBoundingClientRect();pauseBtn.style.left=(c.right-w.left-54)+'px';pauseBtn.style.top=(c.top-w.top+10)+'px';pauseBtn.textContent=G.paused?'▶':'II'}},150);
+setInterval(()=>{const on=playing()&&panelEl.hidden;pauseBtn.hidden=!on;if(on){const w=wrapEl.getBoundingClientRect(),c=cv.getBoundingClientRect();pauseBtn.style.left=(c.right-w.left-54)+'px';pauseBtn.style.top=(c.top-w.top+10)+'px';pauseIcon(G.paused)}},150);
 addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 blastBtn.onclick=()=>act('blast');
 passBtn.onclick=()=>act('pass');

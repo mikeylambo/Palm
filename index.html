@@ -18,7 +18,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);margin:0;d
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;box-sizing:border-box;overflow:hidden;touch-action:manipulation}
 [hidden]{display:none!important}
 #wrap{flex:1;min-height:0;width:100%;display:flex;justify-content:center;align-items:center;position:relative}
-#btn-pause{position:absolute;z-index:4;font-family:var(--display);font-size:22px;width:44px;height:44px;padding:0;background:var(--ink);color:var(--paper);border:2px solid var(--paper);flex:none}
+#btn-pause{position:absolute;z-index:4;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;width:44px;height:44px;padding:0;background:var(--ink);color:var(--paper);border:2px solid var(--paper);flex:none}
 #menu-links{position:absolute;display:flex;gap:10px;justify-content:center}
 #menu-links button,#panel button{flex:0 0 auto;font-family:var(--display);font-size:20px;letter-spacing:.06em;padding:6px 16px;background:transparent;color:var(--paper);border:2px solid var(--paper)}
 #panel{position:absolute;z-index:5;background:var(--ink);border:3px solid var(--paper);color:var(--paper);font-family:var(--body);display:flex;flex-direction:column;gap:14px;padding:20px;box-sizing:border-box;overflow:auto}
@@ -58,7 +58,7 @@ button small{display:block;font-family:var(--body);font-size:11px;letter-spacing
 }
 </style>
 <div id="wrap"><canvas id="c" width="600" height="800" aria-label="PALM game stage"></canvas>
-<button id="btn-pause" type="button" hidden aria-label="Pause">II</button>
+<button id="btn-pause" type="button" hidden aria-label="Pause"></button>
 <div id="menu-links" hidden><button id="btn-settings" type="button">SETTINGS</button><button id="btn-credits" type="button">CREDITS</button><button id="btn-title" type="button" hidden>TITLE</button></div>
 <div id="panel" hidden role="dialog" aria-modal="true"></div>
 <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
