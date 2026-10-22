@@ -38,9 +38,10 @@ export function newFig(){
   dress(f.look,f.smile);if(f.pair)f.pair.forEach(p=>dress(p.look,p.smile));
   return f;
 }
-// k: fraction of the reaction window elapsed. 'early' = acting before a Sleeper wakes or a Turncoat turns.
+// k: fraction of the reaction window elapsed. 'early' = acting before a Sleeper wakes, a Turncoat turns or the second Twin shows.
 export function correctAct(f,k){
   if(f.type==='turncoat'&&f.threat&&k<f.turnAt)return'early';
   if(f.type==='sleeper'&&k<f.openAt)return'early';
+  if(f.type==='twins'&&k<f.secondAt)return'early';
   return f.threat?'blast':'pass';
 }

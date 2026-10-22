@@ -9,7 +9,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const TYPES=['wanderer','lurker','sleeper','twins','turncoat'];
-const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css'};
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.mp3':'audio/mpeg'};
 const server=http.createServer(async(req,res)=>{
   const rel=decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/,'/index.html');
   const file=path.join(root,path.normalize(rel));
@@ -33,7 +33,7 @@ const browser=await chromium.launch();
 const page=await browser.newPage({viewport:{width:900,height:1000},hasTouch:true});
 const errors=[];
 // fonts, the leaderboard and the (optional) music file are outside the game; ignore their network noise
-const external=/fonts\.g|supabase|music\.mp3/;
+const external=/fonts\.g|supabase/;
 page.on('pageerror',e=>errors.push('pageerror: '+e.message));
 page.on('console',m=>{if(m.type()==='error'&&!external.test(m.location().url||'')&&!/Failed to load resource/.test(m.text()))errors.push('console: '+m.text())});
 await page.route(/fonts\.g|supabase/,r=>r.abort());
@@ -51,13 +51,15 @@ const run=await page.evaluate(TYPES=>{
     if(S.mode==='card'){if(G.card!==lastCard){lastCard=G.card;if(G.card.kind==='intro')intros.push(G.card.type)}if(f%40===0)key('ArrowLeft');continue}
     if(fig&&!seen.has(fig.type)){seen.add(fig.type);if(!intros.includes(fig.type))debutBeforeIntro.push(fig.type)}
     if(S.mode==='beat'&&fig&&acted!==fig){const k=(now-G.t0-G.lurk)/G.win;
-      const wait=fig.type==='sleeper'?fig.openAt+.05:fig.type==='turncoat'?fig.turnAt+.05:.1;
+      const wait=fig.type==='sleeper'?fig.openAt+.05:fig.type==='turncoat'?fig.turnAt+.05:fig.type==='twins'?fig.secondAt+.05:.1;
       if(fig.empty)continue; // an empty lurk resolves itself
       if(k>wait){acted=fig;const a=fig.threat?'blast':'pass';key(a==='blast'?' ':'ArrowLeft')}}
   }
   return {seen:[...seen],intros,debutBeforeIntro,beat:P.S.beat,strikes:P.S.strikes,mode:P.S.mode};
 },TYPES);
 console.log(`played to beat ${run.beat}, ${run.strikes} strikes`);
+await page.waitForFunction(()=>PALM.sfx>=16,null,{timeout:5000}).catch(()=>{});
+check(await page.evaluate(()=>PALM.sfx)===16,'all 16 sound files load and decode');
 for(const t of TYPES)check(run.seen.includes(t),`${t} appeared`);
 const order=await page.evaluate(()=>{let met=null;try{met=localStorage.getItem('palm_metall')}catch{}return {met,first:JSON.stringify(PALM.AT)}});
 check(order.first===JSON.stringify({wanderer:0,lurker:10,sleeper:16,twins:23,turncoat:30}),'first run uses the teaching order');

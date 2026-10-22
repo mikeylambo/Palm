@@ -1,7 +1,7 @@
 // Input (keys, buttons, swipes), pause button, and the SETTINGS / CREDITS / TITLE menus.
 import {S,G,SET,saveSet} from './state.js';
 import {act,pause,resume,goTitle,playing} from './game.js';
-import {tone,musicLevel} from './audio.js';
+import {click,musicLevel} from './audio.js';
 import {cv} from './render.js';
 import {lbEl,placeBoard} from './leaderboard.js';
 
@@ -36,7 +36,7 @@ export function showMenu(){titleBtn.hidden=S.mode==='title';menuLinks.hidden=fal
 export function hideMenu(){menuLinks.hidden=true}
 function openPanel(kind){placeMenu();lbEl.hidden=true;panelEl.textContent='';const h=document.createElement('h2');panelEl.appendChild(h);
   if(kind==='settings'){h.textContent='SETTINGS';
-    [['music','Music volume'],['sfx','Sound effects']].forEach(([key,lab])=>{const l=document.createElement('label');l.textContent=lab;const r=document.createElement('input');r.type='range';r.min=0;r.max=1;r.step=.05;r.value=SET[key];r.id='set-'+key;r.oninput=()=>{SET[key]=+r.value;saveSet();if(key==='music')musicLevel();else tone(440,.08,'triangle',.12)};l.appendChild(r);panelEl.appendChild(l)});
+    [['music','Music volume'],['sfx','Sound effects']].forEach(([key,lab])=>{const l=document.createElement('label');l.textContent=lab;const r=document.createElement('input');r.type='range';r.min=0;r.max=1;r.step=.05;r.value=SET[key];r.id='set-'+key;r.oninput=()=>{SET[key]=+r.value;saveSet();if(key==='music')musicLevel();else click()};l.appendChild(r);panelEl.appendChild(l)});
     [['shake','Screen shake'],['flashes','Flashes'],['haptics','Vibration']].forEach(([key,lab])=>{const l=document.createElement('label');l.textContent=lab;const c=document.createElement('input');c.type='checkbox';c.checked=!!SET[key];c.id='set-'+key;c.onchange=()=>{SET[key]=c.checked;saveSet()};l.appendChild(c);panelEl.appendChild(l)});
   }else{h.textContent='CREDITS';
     [['Game','Mikey Lambo'],['Music','Mikey Lambo']].forEach(([role,who])=>{const d=document.createElement('div');d.className='credit';const b=document.createElement('b');b.textContent=role;d.append(b,who);panelEl.appendChild(d)})}

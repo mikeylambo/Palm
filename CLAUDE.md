@@ -18,13 +18,16 @@ The game got better every time something was cut. Treat these as hard constraint
 - **Arrivals pop in instantly,** except the Lurker and, once the Lurker is known, a growing share of anyone you've met (0% at beat 10 → 30% at 25 → 45% at 60), who come out of the shadow. The shadow's random wait widens 0.5 s → 1.7 s (beat 20) → 2.1 s (beat 45). All ramps use `ramp()` in `state.js` and keep climbing slowly past the last debut so long runs don't plateau. Only the Lurker can turn out to be nothing.
 - **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size.
 - **The blast is a Hakai, not a ki blast:** instant, no charge, no beam. Violet flash (no screen invert), whiteout, palm thrust, deep boom. The blasted face does one of three things, 33/33/33: fling, crumble into ink flakes, or simply get covered by the white. Every blast holds its first frame for 75 ms (hit-stop, `HITSTOP` in `game.js`); correct reads also get an 85 ms beat before it.
+- **The snap:** the speed bonus (+50 under 400 ms) counts from the moment acting became valid (the reveal from a shadow, a Sleeper's eyes opening, a Turncoat's turn, the second Twin). A correct blast within 400 ms of that after a wait is a snap: 140 ms hit-stop and a bigger boom.
+- **The shadow breathes:** a rising drone (`shadow.mp3`) timed so its peak lands on the reveal, cut to silence 120 ms before it. In 40% of waits over 0.7 s the shadow twitches toward you once (never act on a shadow: that rule never changes).
+- **Silence before a reveal:** the music ducks to 25% while you wait (shadow, nap, the second Twin, pause, the slump) and cuts to silence for the last 120 ms before a reveal you're waiting on. Never before a Turncoat's turn, which would give it away.
 - **Aura is the first read** (red = threat, gold = friend), eyes second (slit pupils = threat). Disguises appear later. Disguised Wanderers start after the Lurker's learn stretch and never appear during any learn stretch; they ramp 8% (beat 14) → 32% (20) → 50% (52), never above 50% so the aura never becomes a reverse tell.
 - Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button` (no Best line).
 - **The face that ended your run** fades back into the top panel, still and with no caption, while the guardian slumps, and stays faintly behind GAME OVER. A blast at thin air leaves the panel empty.
 - No rule moments: `LET NOTHING PASS` / `MERCY` were cut.
 - **Never cheat the player:** every mistake must be readable on screen at the moment you act. No type may look identical to another with a different rule.
 - **Kind tone:** no children, no crying, no demon masks.
-- **Music target: about 174 BPM.** The game is not beat-synced; the track loops underneath.
+- **Music target: about 174 BPM.** The game is not beat-synced; the track loops underneath. Placeholder now: Logica, "Palm OST" (~169 BPM), fade-out trimmed so it loops at 3:21.
 
 ## Roster (unlock beat)
 
@@ -33,7 +36,7 @@ The game got better every time something was cut. Treat these as hard constraint
 | Wanderer | 0 | Watch the eyes. The aura can lie (intro card says exactly this) |
 | Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = FLINCHED |
 | Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = FLINCHED |
-| Twins | 23 | Two faces. Blast if either is a threat |
+| Twins | 23 | Two faces; the second pops in 0.2–1.1 s after the first. Moving before both show = FLINCHED. Then blast if either is a threat. Onlookers stay tense until both show |
 | Turncoat | 30 | Violet aura (like Sleeper and Twins: violet = a special, watch the eyes), smiles; some turn 20–65% into the beat (always ~0.4 s left to blast). Moving before the turn = FLINCHED |
 
 Order: a player's first full run uses the table's order. Once they have met every type (`palm_metall` in localStorage), the Lurker still debuts at 10 and the Sleeper, Twins and Turncoat are dealt into the 16/23/30 slots at random each run (`dealOrder()` / `AT` in `state.js`).
@@ -56,12 +59,12 @@ Three onlookers (bowl cut, spiky, topknot). Letting a threat through knocks one 
 - `src/characters.js`: `pickType()`, `freshType()`, `newLook()`, `newFig()`, `correctAct()`
 - `src/game.js`: game flow: `startBeat()`, `spawn()`, `act()`, `update()`, `pause()`, `resume()`, `goTitle()`. Modes: `title`, `card`, `lurk`, `beat`, `resolve`, `fall`, `over`
 - `src/render.js`: all drawing, `draw()` plus the faces (`face()`; `L.classic` draws the v1 face). The blast effect is the block starting `// hakai`
-- `src/audio.js`: synthesized sfx (`tone()`, `kiBoom()`, plus the reaction cues `popIn()` on every arrival, a double pop for Twins; `eyesOpen()` when a Sleeper wakes; `turnSting()` when a Turncoat turns), haptics, music volume/ducking
+- `src/audio.js`: sound. The owner's picks live in `sfx/` (pop, pop2 for the second Twin, eyes_open, turn, shadow, nothing, pass, flinch, strike, ko, flee, combo at ×4/×8, intro, slump, gameover, click), cut and levelled by `tools/build_sfx.py` from their source takes, decoded into Web Audio buffers on the first input. Each cue falls back to a synthesized `tone()` until its file loads. The blast boom (`kiBoom()`) stays synthesized. Music runs through a Web Audio gain (`musicLevel()`, called every frame) for the ducks and silences
 - `src/ui.js`: keys, buttons, swipes, pause button, menus (`openPanel()`, `closePanel()`, `showMenu()`, `#menu-links`)
 - `src/leaderboard.js`: shared Supabase project `leaderboards`, table `scores`, rows tagged `game: 'palm'` (same setup as `neonstriker/src/systems/online.js`). Publishable key is client-safe; RLS protects the table. There is also a `window.claude` db path used only when the game runs as a claude.ai artifact; it is inert on Vercel.
 - `tests/playthrough.mjs` (`npm test`): headless Playwright run on a seeded virtual clock; plays until every type appears, checks intro cards, pause keys, TITLE, game over and console errors. `.vercelignore` keeps tests and `package.json` out of the deploy, so Vercel stays a static site.
 - `src/main.js`: main loop (`frame()`), plus a read-only `window.PALM` hook used by the tests
-- Music: `<audio id="bgm" src="music.mp3">`. Drop `music.mp3` in the repo root. It loops, follows the volume slider, and ducks during the Lurker wait, pause and the game-over slump.
+- Music: `<audio id="bgm" src="music.mp3">` in the repo root. Replace the file to change the track.
 
 ## Status
 
@@ -71,4 +74,4 @@ Pause note: the owner's report never reproduced headless. The live build had the
 
 ## Remaining
 
-1. Hook up the owner's music (about 174 BPM): drop `music.mp3` in the repo root (wiring is done).
+1. Final music (about 174 BPM): replace the placeholder `music.mp3`.

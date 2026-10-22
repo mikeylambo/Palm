@@ -5,7 +5,7 @@ export const ROSTER={
   wanderer:{name:'WANDERER',tip:'Watch the eyes. The aura can lie.',at:0},
   lurker:{name:'LURKER',tip:'A shadow that sometimes never comes. Do not flinch.',at:10},
   sleeper:{name:'SLEEPER',tip:'Eyes shut. Wait for them to open, then read them. Move first and you flinch.',at:16},
-  twins:{name:'TWINS',tip:'Two faces, one verdict. Blast if either one is a threat.',at:23},
+  twins:{name:'TWINS',tip:'Two faces, one verdict. Wait for both, then blast if either one is a threat.',at:23},
   turncoat:{name:'TURNCOAT',tip:'Smiles at first. Some turn. Move before the turn and you flinch.',at:30},
 };
 export const S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};

@@ -95,17 +95,18 @@ function drawFig(f,cx,cy,sc,k){
   const L0=f.look;g.translate(0,react==='panic'?Math.sin(T/20)*3:Math.sin(T/L0.bobs)*L0.bob);
   if(k>=0&&k<.09&&!react){const q=(.09-k)/.09;g.scale(1+q*.25,1-q*.2)}
   if(f.type==='twins'){
-    f.pair.forEach((p,i)=>{g.save();g.translate(i?70:-70,i?18:-8);g.scale(.72,.72);collar();face(p.look,{slit:p.slit,smile:p.smile,react});g.restore()});
+    f.pair.forEach((p,i)=>{if(i&&k<f.secondAt)return; // the second face pops in a beat later
+      const q=i?Math.max(0,1-(k-f.secondAt)*G.win/90):0;g.save();g.translate(i?70:-70,i?18:-8);g.scale(.72*(1+q*.25),.72*(1-q*.2));collar();face(p.look,{slit:p.slit,smile:p.smile,react});g.restore()});
     g.restore();return;
   }
   collar();
   face(f.look,{slit:turned||f.slit,smile:turned?false:f.smile,turned,closed:closed&&react!=='panic',react});
   g.restore();
 }
-function drawShadow(t,p){
-  // silhouette pressing against the panel during the lurk
+function drawShadow(t,p,tw=0){
+  // silhouette pressing against the panel during the lurk; tw (0..1) = a sudden twitch toward you
   g.save();poly(TOP);g.clip();
-  g.fillStyle=`rgba(17,16,20,${.12+.18*p})`;g.beginPath();g.ellipse(560-p*60,260,70,110,0,0,7);g.fill();
+  g.fillStyle=`rgba(17,16,20,${.12+.18*p+.25*tw})`;g.beginPath();g.ellipse(560-p*60-tw*45,260+tw*6,70+tw*14,110+tw*10,-tw*.12,0,7);g.fill();
   g.strokeStyle=C.ink;g.lineWidth=1;for(let i=0;i<18;i++){const y=60+i*24+j(i)*8;g.beginPath();g.moveTo(580,y);g.lineTo(580-40-p*140-(i%3)*20,y+4);g.stroke()}
   g.restore();
 }
@@ -181,7 +182,7 @@ export function draw(t){
   if(fig)fig.react=S.mode==='resolve'?(res.a==='blast'?'panic':res.a==='pass'?'wave':null):null;
   const end=S.mode==='fall'||S.mode==='over';
   if(end&&G.killer){drawKiller(t);onl='calm'}
-  else if(S.mode==='lurk'){drawShadow(t,Math.min(1,(t-t0)/lurk));onl='tense'}
+  else if(S.mode==='lurk'){const tw=fig.twitchAt?Math.max(0,1-Math.abs(t-t0-fig.twitchAt-60)/60):0;drawShadow(t,Math.min(1,(t-t0)/lurk),tw);onl='tense'}
   else if(fig&&(S.mode==='beat'||S.mode==='resolve')&&!res?.lurk||S.mode==='beat'){
     const f=fig;
     if(f.empty){drawShadow(t,Math.max(0,1-k*2));onl='tense'}
@@ -192,7 +193,7 @@ export function draw(t){
     }else{
       const p=S.mode==='beat'?Math.min(1,(t-t0-lurk)/150):1;
       drawAura(420,230,f.aura,t);g.save();poly(TOP);g.clip();layer(1,()=>{let fl=0;if(S.mode==='resolve'&&res.a==='blast'){fl=Math.max(0,Math.min(1,((t-res.t)/res.dur-.04)*4))}if(fl&&res&&res.fx==='fling'){g.translate(420+fl*70,230-fl*50);g.rotate(fl*.6);g.translate(-420,-230);drawFig(f,420,230,(.6+.35*p)*(1-fl*.55),k)}else if(res&&res.fx==='crumble'){g.globalAlpha=1-fl;drawFig(f,420,230,(.6+.35*p),k);g.globalAlpha=1}else drawFig(f,420,230,(.6+.35*p),k);});g.restore();
-      onl=(f.type==='sleeper'&&k<f.openAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
+      onl=(f.type==='sleeper'&&k<f.openAt)||(f.type==='twins'&&k<f.secondAt)?'tense':((f.threat&&!(f.type==='turncoat'&&k<f.turnAt))?'fear':'calm');
       if(S.mode==='resolve')onl=f.threat?'joy':'horror';
     }
   }else{g.save();poly(TOP);g.clip();g.strokeStyle='#c9c6b8';g.lineWidth=1;for(let i=0;i<30;i++){g.beginPath();g.moveTo(180+i*15,40);g.lineTo(160+i*15,480);g.stroke()}g.restore()}
