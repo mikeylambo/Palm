@@ -1,5 +1,5 @@
 // Game flow. Modes: title, card, lurk, beat, resolve, fall, over ('x' while a run starts).
-import {ROSTER,S,G,OL,seen,RI,ramp,dealOrder} from './state.js';
+import {ROSTER,S,G,OL,seen,RI,ramp,jabOrHold,dealOrder} from './state.js';
 import {newFig,correctAct,freshType} from './characters.js';
 import {buzz,kiBoom,startMusic,popIn,popSecond,eyesOpen,turnSting,passSound,flinchSound,strikeSound,nothingSound,comboSound,introSound,slumpSound,gameoverSound,shadowStart,shadowStop} from './audio.js';
 import {panelOpen,showMenu,hideMenu} from './ui.js';
@@ -19,12 +19,12 @@ export function spawn(){
   const fig=G.fig=newFig(),learning=G.learnLeft>0;if(learning)G.learnLeft--;
   G.win=Math.max(1200,2200-S.beat*55); // warm-up, then the clock holds: tension comes from the characters' timing
   if(fig.type==='sleeper'){const ms=150+Math.pow(Math.random(),1.6)*2200;G.win+=ms;fig.openAt=ms/G.win} // wildly variable nap: blink-short to agonizing
-  if(fig.type==='twins'){const ms=200+Math.pow(Math.random(),1.3)*900;G.win+=ms;fig.secondAt=ms/G.win} // the second face comes a beat after the first
+  if(fig.type==='twins'){const ms=jabOrHold(150,350,700,1100);G.win+=ms;fig.secondAt=ms/G.win} // the second face comes a beat after the first
   // lurk: variable silence before the reveal. Wider spread as the run goes on.
-  const spread=ramp(S.beat,[[0,500],[20,1700],[45,2100]]);G.lurk=250+Math.random()*spread;
-  if(fig.type==='lurker'&&Math.random()<.5)G.lurk+=500;
+  const spread=ramp(S.beat,[[0,500],[20,1700],[45,2100]]);G.lurk=jabOrHold(250,600,250+spread*.6,250+spread);
+  if(fig.type==='lurker'&&G.lurk>600&&Math.random()<.5)G.lurk+=500; // a Lurker's hold can stretch further; its jabs stay quick
   // most arrivals pop in instantly; once the Lurker is known, a growing share of anyone you've met comes out of the shadow
-  if(fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<ramp(S.beat,[[10,0],[25,.3],[60,.45]])))G.lurk=0;
+  if(fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<ramp(S.beat,[[10,0],[25,.3]])))G.lurk=0;
   // the shadow sometimes twitches once mid-wait, baiting a flinch (the rule never changes: never act on a shadow)
   if(G.lurk>700&&Math.random()<.4)fig.twitchAt=G.lurk*(.3+Math.random()*.4);
   G.t0=performance.now();S.mode='lurk';if(G.lurk>0)shadowStart(G.lurk);

@@ -29,4 +29,6 @@ export const SET={music:.7,sfx:.8,shake:true,flashes:true,haptics:true};try{Obje
 export function saveSet(){try{localStorage.setItem("palm_settings",JSON.stringify(SET))}catch(e){}}
 export const R=(a,b)=>a+Math.random()*(b-a),RI=n=>Math.floor(Math.random()*n);
 // piecewise-linear ramp over the beat: pts = [[beat,value],...], flat before the first and after the last
+// timing at the extremes: half the time a quick jab in [a,b], half a long hold in [c,d]. Contrast, not a muddy middle.
+export const jabOrHold=(a,b,c,d)=>Math.random()<.5?R(a,b):R(c,d);
 export const ramp=(x,pts)=>{if(x<=pts[0][0])return pts[0][1];for(let i=1;i<pts.length;i++){const [x0,y0]=pts[i-1],[x1,y1]=pts[i];if(x<=x1)return y0+(y1-y0)*(x-x0)/(x1-x0)}return pts[pts.length-1][1]};

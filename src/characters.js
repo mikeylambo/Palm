@@ -1,10 +1,11 @@
 // Characters: who arrives, how they look, and the right call for each.
-import {C,ROSTER,AT,S,G,seen,R,RI,ramp} from './state.js';
+import {C,ROSTER,AT,S,G,seen,R,RI,ramp,jabOrHold} from './state.js';
 
 // learn, then mix: a debut is followed by two more of the newcomer (three in a row); after that, everyone
 // you've met, the two newest a little more often. A type only ever debuts through its intro card.
 export function pickType(){if(G.learnLeft>0)return G.learnType;
-  const sp=[...seen].filter(k=>k!=='wanderer'),pool=['wanderer',...sp,...sp.slice(-2)];
+  // once everyone has debuted this run, anything goes: every type equally often
+  const sp=[...seen].filter(k=>k!=='wanderer'),all=seen.size===Object.keys(ROSTER).length,pool=['wanderer',...sp,...(all?[]:sp.slice(-2))];
   return pool[Math.floor(Math.random()*pool.length)]}
 export function freshType(){return Object.keys(ROSTER).find(k=>S.beat>=AT[k]&&!seen.has(k))}
 
@@ -29,7 +30,7 @@ export function newFig(){
   // quick climb, then a slow one to a coin flip (50%) by beat 52
   const disguise=b>=14&&!(G.learnLeft>0)&&Math.random()<ramp(b,[[14,.08],[20,.32],[52,.5]]);
   const f={type,threat,look:newLook(),empty:false,turnAt:0,turned:false,openAt:0};
-  if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.violet;f.slit=false;f.smile=true;f.turnAt=.2+Math.random()*.45} // violet = a special: watch the eyes; latest turn leaves ~0.4 s
+  if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.violet;f.slit=false;f.smile=true;f.turnAt=jabOrHold(.2,.3,.5,.65)} // violet = a special: watch the eyes; latest turn leaves ~0.4 s
   else if(type==='lurker'){f.empty=Math.random()<.35;f.aura=threat?C.threat:C.grace;f.slit=threat;f.smile=!threat;if(f.empty)f.threat=false}
   else if(type==='sleeper'){f.aura=C.violet;f.slit=threat;f.smile=!threat;f.openAt=.2+Math.random()*.35}
   else if(type==='twins'){const a=Math.random()<.5,b2=Math.random()<.5;f.threat=a||b2;f.aura=C.violet;
