@@ -19,7 +19,7 @@ The game got better every time something was cut. Treat these as hard constraint
 - **Faces:** keep the janky procedural faces. The original v1 faces (white face, black spiky hair, big grin or grumpy jagged mouth) appear about 17% of the time and never twice in a row. Arrivals are drawn at v1 size.
 - **The blast is a Hakai, not a ki blast:** instant, no charge, no beam. Violet flash (no screen invert), whiteout, palm thrust, deep boom. The blasted face does one of three things, 33/33/33: fling, crumble into ink flakes, or simply get covered by the white. Every blast holds its first frame for 75 ms (hit-stop, `HITSTOP` in `game.js`); correct reads also get an 85 ms beat before it.
 - **The snap:** the speed bonus (+50 under 400 ms) counts from the moment acting became valid (the reveal from a shadow, a Sleeper's eyes opening, a Turncoat's turn, the second Twin). A correct blast within 400 ms of that after a wait is a snap: 140 ms hit-stop and a bigger boom.
-- **The shadow breathes:** a rising drone (`shadow.mp3`) timed so its peak lands on the reveal, cut to silence 120 ms before it. In 40% of waits over 0.7 s the shadow twitches toward you once (never act on a shadow: that rule never changes).
+- **The shadow breathes:** a rising drone (`shadow.mp3`) timed so its peak lands on the reveal, cut to silence 120 ms before it. In 40% of waits over 0.7 s the panel flashes dark once (playtest 10/25: replaced the shadow's twitch; never act on a shadow: that rule never changes). Sleepers never come out of the shadow (a shadow wait then a nap was one wait too many).
 - **No music ducking during play** (owner playtest 10/22: it sapped the energy). The track only drops during pause and the game-over slump.
 - **Aura is the first read** (red = threat, gold = friend), eyes second (slit pupils = threat). Disguises appear later. Disguised Wanderers start after the Lurker's learn stretch and never appear during any learn stretch; they ramp 8% (beat 14) → 32% (20) → 50% (52), never above 50% so the aura never becomes a reverse tell.
 - Main menu text is only: `PALM`, `Blast it, or let it pass.`, `Press any button` (no Best line).
@@ -35,7 +35,7 @@ The game got better every time something was cut. Treat these as hard constraint
 | --- | --- | --- |
 | Wanderer | 0 | Watch the eyes. The aura can lie (intro card says exactly this) |
 | Lurker | 10 | Shadow, variable wait; sometimes nothing comes. Pressing early = a strike |
-| Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = a strike |
+| Sleeper | 16 | Eyes shut 0.15–2.3 s. Moving before they open = a strike. Never from the shadow; the mouth is a coin flip so shut eyes give nothing away (playtest 10/25: v1 faces' grin/grump gave the read) |
 | Twins | 23 | Two faces; the second pops in 0.15–0.35 s or 0.7–1.1 s after the first. Moving before both show = a strike. Then blast if either is a threat. Onlookers stay tense until both show |
 | Turncoat | 30 | Violet aura (like Sleeper and Twins: violet = a special, watch the eyes), smiles; some turn either early (20–30% into the beat) or late (50–65%, always ~0.4 s left to blast). Moving before the turn = a strike |
 

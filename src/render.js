@@ -103,11 +103,12 @@ function drawFig(f,cx,cy,sc,k){
   face(f.look,{slit:turned||f.slit,smile:turned?false:f.smile,turned,closed:closed&&react!=='panic',react});
   g.restore();
 }
-function drawShadow(t,p,tw=0){
-  // silhouette pressing against the panel during the lurk; tw (0..1) = a sudden twitch toward you
+function drawShadow(t,p,fl=0){
+  // silhouette pressing against the panel during the lurk; fl (0..1) = the panel flashing dark for an instant
   g.save();poly(TOP);g.clip();
-  g.fillStyle=`rgba(17,16,20,${.12+.18*p+.25*tw})`;g.beginPath();g.ellipse(560-p*60-tw*45,260+tw*6,70+tw*14,110+tw*10,-tw*.12,0,7);g.fill();
+  g.fillStyle=`rgba(17,16,20,${.12+.18*p})`;g.beginPath();g.ellipse(560-p*60,260,70,110,0,0,7);g.fill();
   g.strokeStyle=C.ink;g.lineWidth=1;for(let i=0;i<18;i++){const y=60+i*24+j(i)*8;g.beginPath();g.moveTo(580,y);g.lineTo(580-40-p*140-(i%3)*20,y+4);g.stroke()}
+  if(fl>0){g.fillStyle=`rgba(17,16,20,${fl*(SET.flashes?.92:.5)})`;g.fillRect(150,30,440,460)}
   g.restore();
 }
 // the guardian's right hand, raised toward the arrival, seen from behind: a plain back of the hand, thumb on the left. The sleeve meets a cuff that wraps the wrist at the forearm's angle.
@@ -204,7 +205,7 @@ export function draw(t){
   if(fig)fig.react=S.mode==='resolve'?(res.a==='blast'?'panic':res.a==='pass'?'wave':null):null;
   const end=S.mode==='fall'||S.mode==='over';
   if(end&&G.killer){drawKiller(t);onl='calm'}
-  else if(S.mode==='lurk'){const tw=fig.twitchAt?Math.max(0,1-Math.abs(t-t0-fig.twitchAt-60)/60):0;drawShadow(t,Math.min(1,(t-t0)/lurk),tw);onl='tense'}
+  else if(S.mode==='lurk'){const d=t-t0-fig.flashAt,fl=fig.flashAt&&d>=0?(d<25?1:Math.max(0,1-(d-25)/130)):0;drawShadow(t,Math.min(1,(t-t0)/lurk),fl);onl='tense'}
   else if(fig&&(S.mode==='beat'||S.mode==='resolve')&&!res?.lurk||S.mode==='beat'){
     const f=fig;
     if(f.empty){drawShadow(t,Math.max(0,1-k*2));onl='tense'}

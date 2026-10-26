@@ -24,9 +24,10 @@ export function spawn(){
   const spread=ramp(S.beat,[[0,500],[20,1700],[45,2100]]);G.lurk=jabOrHold(250,600,250+spread*.6,250+spread);
   if(fig.type==='lurker'&&G.lurk>600&&Math.random()<.5)G.lurk+=500; // a Lurker's hold can stretch further; its jabs stay quick
   // most arrivals pop in instantly; once the Lurker is known, a growing share of anyone you've met comes out of the shadow
-  if(fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<ramp(S.beat,[[10,0],[25,.3]])))G.lurk=0;
-  // the shadow sometimes twitches once mid-wait, baiting a flinch (the rule never changes: never act on a shadow)
-  if(G.lurk>700&&Math.random()<.4)fig.twitchAt=G.lurk*(.3+Math.random()*.4);
+  // Sleepers never do: a shadow wait and then a nap is one wait too many (playtest 10/25)
+  if(fig.type==='sleeper'||fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<ramp(S.beat,[[10,0],[25,.3]])))G.lurk=0;
+  // the panel sometimes flashes once mid-wait, baiting a flinch (the rule never changes: never act on a shadow)
+  if(G.lurk>700&&Math.random()<.4)fig.flashAt=G.lurk*(.3+Math.random()*.4);
   G.t0=performance.now();S.mode='lurk';if(G.lurk>0)shadowStart(G.lurk);
 }
 // a mistake: one onlooker leaves ('ko' = knocked out by a threat let through, 'flee' = anything else)

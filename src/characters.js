@@ -32,7 +32,8 @@ export function newFig(){
   const f={type,threat,look:newLook(),empty:false,turnAt:0,turned:false,openAt:0};
   if(type==='turncoat'){f.threat=Math.random()<.6;f.aura=C.violet;f.slit=false;f.smile=true;f.turnAt=jabOrHold(.2,.3,.5,.65)} // violet = a special: watch the eyes; latest turn leaves ~0.4 s
   else if(type==='lurker'){f.empty=Math.random()<.35;f.aura=threat?C.threat:C.grace;f.slit=threat;f.smile=!threat;if(f.empty)f.threat=false}
-  else if(type==='sleeper'){f.aura=C.violet;f.slit=threat;f.smile=!threat;f.openAt=.2+Math.random()*.35}
+  // a Sleeper's mouth is a coin flip (as with the Twins): shut eyes give nothing away, v1 faces included
+  else if(type==='sleeper'){f.aura=C.violet;f.slit=threat;f.smile=Math.random()<.5;f.openAt=.2+Math.random()*.35}
   else if(type==='twins'){const a=Math.random()<.5,b2=Math.random()<.5;f.threat=a||b2;f.aura=C.violet;
     f.pair=[{slit:a,smile:Math.random()<.5,look:newLook()},{slit:b2,smile:Math.random()<.5,look:newLook()}]}
   else{const at=disguise?!threat:threat;f.aura=at?C.threat:C.grace;f.slit=threat;f.smile=disguise?!threat:!threat}
