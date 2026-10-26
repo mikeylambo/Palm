@@ -8,7 +8,7 @@ export const ROSTER={
   twins:{name:'TWINS',tip:'Two faces, one verdict. Wait for both, then blast if either one is a threat.',at:23},
   turncoat:{name:'TURNCOAT',tip:'Smiles at first. Some turn. Move before the turn and you flinch.',at:30},
 };
-export const S={mode:'title',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
+export const S={mode:'splash',score:0,combo:1,strikes:0,beat:0,best:0,heat:0};
 try{S.best=+localStorage.getItem('palm_best')||0}catch(e){}
 // fig: current arrival. t0/lurk/win: beat timing (ms). res: last verdict being animated. card: intro card.
 // learnType/learnLeft: the newest type and how many arrivals of its learn stretch are left.

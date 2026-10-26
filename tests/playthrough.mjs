@@ -41,13 +41,20 @@ await page.addInitScript(virtualClock);
 await page.goto(`http://localhost:${server.address().port}/index.html`);
 await page.waitForFunction(()=>window.PALM&&window.__step);
 
+// 0. the splash: PRESS START, no menu; the first press lands on the main menu with the music already going
+check(await page.evaluate(()=>PALM.S.mode)==='splash'&&await page.isHidden('#menu-links'),'the page opens on PRESS START with no menu');
+await page.keyboard.press('Enter');
+check(await page.evaluate(()=>PALM.S.mode)==='title'&&await page.isVisible('#menu-links'),'any key on the splash opens the main menu');
+await page.waitForFunction(()=>PALM.music,null,{timeout:8000}).catch(()=>{});
+check(await page.evaluate(()=>PALM.S.mode==='title'&&!!PALM.music),'the music is playing on the main menu');
+
 // 1. play well until every type has shown up
 const run=await page.evaluate(TYPES=>{
   const P=window.PALM,key=k=>dispatchEvent(new KeyboardEvent('keydown',{key:k}));
   const seen=new Set(),intros=[],debutBeforeIntro=[],seq=[];let acted=null,lastCard=null,lastFig=null;
   for(let f=0;f<60000&&seen.size<TYPES.length;f++){__step(1000/60);
     const S=P.S,G=P.G,fig=P.fig,now=performance.now();
-    if(S.mode==='title'){if(f%30===0)key(' ');continue}
+    if(S.mode==='splash'||S.mode==='title'){if(f%30===0)key(' ');continue}
     if(S.mode==='card'){if(G.card!==lastCard){lastCard=G.card;if(G.card.kind==='intro')intros.push(G.card.type)}if(f%40===0)key('ArrowLeft');continue}
     if(fig&&fig!==lastFig){lastFig=fig;seq.push(fig.type)}
     if(fig&&!seen.has(fig.type)){seen.add(fig.type);if(!intros.includes(fig.type))debutBeforeIntro.push(fig.type)}

@@ -26,9 +26,11 @@ passBtn.onclick=()=>act('pass');
 // swipe right = blast, any other swipe = pass; a tap only starts, resumes or dismisses a card
 let sw=null;cv.addEventListener('touchstart',e=>{const p=e.touches[0];sw={x:p.clientX,y:p.clientY}},{passive:true});
 cv.addEventListener('touchend',e=>{if(!sw)return;const p=e.changedTouches[0],dx=p.clientX-sw.x,dy=p.clientY-sw.y;sw=null;
-  if(Math.max(Math.abs(dx),Math.abs(dy))<30){if(S.mode==='title'||S.mode==='over'||G.paused||S.mode==='card')act('pass');return}
+  if(Math.max(Math.abs(dx),Math.abs(dy))<30){if(S.mode==='splash'||S.mode==='title'||S.mode==='over'||G.paused||S.mode==='card')act('pass');return}
   if(dx>30&&Math.abs(dx)>Math.abs(dy))act('blast');else act('pass')},{passive:true});
-addEventListener('keydown',e=>{if(e.repeat||e.target.tagName==='INPUT'||!panelEl.hidden)return;if(['ArrowRight',' ','d','D'].includes(e.key)){e.preventDefault();act('blast')}else if(['ArrowLeft','ArrowDown','a','A','s','S'].includes(e.key)){e.preventDefault();act('pass')}});
+// the splash takes any key (bar modifiers and Tab) and a mouse click on the stage
+cv.addEventListener('click',()=>{if(S.mode==='splash')act('pass')});
+addEventListener('keydown',e=>{if(e.repeat||e.target.tagName==='INPUT'||!panelEl.hidden)return;if(S.mode==='splash'){if(!['Tab','Shift','Control','Alt','Meta'].includes(e.key)){e.preventDefault();act('pass')}return}if(['ArrowRight',' ','d','D'].includes(e.key)){e.preventDefault();act('blast')}else if(['ArrowLeft','ArrowDown','a','A','s','S'].includes(e.key)){e.preventDefault();act('pass')}});
 
 // ---------- menus: settings, credits, title ----------
 function canvasBox(){const w=wrapEl.getBoundingClientRect(),c=cv.getBoundingClientRect();return{l:c.left-w.left,t:c.top-w.top,w:c.width,h:c.height,k:c.height/800}}
@@ -62,4 +64,4 @@ document.getElementById('btn-credits').onclick=()=>openPanel('credits');
 titleBtn.onclick=goTitle;
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!panelEl.hidden)closePanel()});
 addEventListener('resize',()=>{if(!menuLinks.hidden||!panelEl.hidden)placeMenu()});
-requestAnimationFrame(()=>{menuLinks.hidden=false;placeMenu()});
+requestAnimationFrame(()=>{if(S.mode!=='splash'){menuLinks.hidden=false;placeMenu()}});

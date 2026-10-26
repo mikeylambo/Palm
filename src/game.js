@@ -1,4 +1,5 @@
-// Game flow. Modes: title, card, lurk, beat, resolve, fall, over ('x' while a run starts).
+// Game flow. Modes: splash (PRESS START, once per page load: that first press unlocks audio so the music is already
+// playing on the main menu), title, card, lurk, beat, resolve, fall, over ('x' while a run starts).
 import {ROSTER,S,G,OL,seen,RI,ramp,jabOrHold,dealOrder} from './state.js';
 import {newFig,correctAct,freshType} from './characters.js';
 import {buzz,kiBoom,startMusic,popIn,popSecond,eyesOpen,turnSting,passSound,flinchSound,strikeSound,nothingSound,comboSound,introSound,slumpSound,gameoverSound,shadowStart,shadowStop} from './audio.js';
@@ -37,6 +38,7 @@ function comboUp(){const c=S.combo;S.combo=Math.min(8,c+1);if((c<4&&S.combo>=4)|
 function validAt(f){return G.lurk+G.win*(f.type==='sleeper'?f.openAt:f.type==='twins'?f.secondAt:f.type==='turncoat'&&f.threat?f.turnAt:0)}
 export function act(a){
   const now=performance.now();if(panelOpen())return;
+  if(S.mode==='splash'){S.mode='title';startMusic();showMenu();return}
   if(S.mode==='title'||S.mode==='over'){hideBoard();hideMenu();startMusic();OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'x',score:0,combo:1,strikes:0,beat:0,heat:0});G.killer=null;G.learnLeft=0;seen.clear();dealOrder();startBeat();return}
   if(G.paused){resume();return}
   const fig=G.fig;

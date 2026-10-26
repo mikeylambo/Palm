@@ -261,6 +261,7 @@ export function draw(t){
       ['Blast it, or let it pass.','','Press any button'];
     lines.forEach((l,i)=>g.fillText(l,300,330+i*34));
   }
+  if(S.mode==='splash'){g.fillStyle=C.ink;g.fillRect(-20,-20,640,840);if(t%1000<650)layer(7,()=>txt('PRESS START',300,425,76,C.paper))}
   if(G.paused){g.fillStyle='rgba(17,16,20,.8)';g.fillRect(0,0,600,800);txt('PAUSED',300,400,90,C.paper);g.font='18px "Zen Kaku Gothic New",sans-serif';g.textAlign='center';g.fillStyle=C.grace;g.fillText('Press any button to resume',300,450)}
   g.restore();
 }
