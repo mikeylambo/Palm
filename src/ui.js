@@ -36,8 +36,18 @@ function placeMenu(){const b=canvasBox();menuLinks.style.left=b.l+'px';menuLinks
   // panels cover the whole stage, but never shrink below a readable size (landscape phones)
   const W=wrapEl.clientWidth,H=wrapEl.clientHeight,pw=Math.min(W,Math.max(b.w,300)),ph=Math.min(H,Math.max(b.h,340));
   panelEl.style.left=Math.max(0,b.l+(b.w-pw)/2)+'px';panelEl.style.width=pw+'px';panelEl.style.top=Math.max(0,b.t+(b.h-ph)/2)+'px';panelEl.style.height=ph+'px';panelEl.style.maxHeight=''}
-export function showMenu(){titleBtn.hidden=S.mode==='title';menuLinks.hidden=false;placeMenu()}
-export function hideMenu(){menuLinks.hidden=true}
+// SHARE at game over: the score and the link. Where the platform takes files, the game-over frame goes with it
+// (grabbed ahead of the tap: Safari drops the share if the tap has to wait on an image).
+const SITE='https://palm-nu.vercel.app',shareBtn=document.getElementById('btn-share');let shot=null;
+function grabShot(){shot=null;setTimeout(()=>{if(S.mode==='over')cv.toBlob(b=>{if(b&&S.mode==='over')shot=new File([b],'palm.png',{type:'image/png'})},'image/png')},450)}
+function shareSays(w){shareBtn.textContent=w;setTimeout(()=>shareBtn.textContent='SHARE',1400)}
+shareBtn.onclick=async()=>{const text=`PALM · ${String(S.score).padStart(6,'0')}\nBlast it, or let it pass.`;
+  try{if(navigator.share){const files=shot&&navigator.canShare?.({files:[shot]})?[shot]:null;
+      await navigator.share(files?{files,text:text+'\n'+SITE}:{title:'PALM',text,url:SITE});return}
+    await navigator.clipboard.writeText(text+'\n'+SITE);shareSays('COPIED')}
+  catch(e){if(e&&e.name!=='AbortError')shareSays('NO LUCK')}};
+export function showMenu(){titleBtn.hidden=S.mode==='title';if(S.mode==='over'&&shareBtn.hidden){shareBtn.hidden=false;grabShot()}else if(S.mode!=='over')shareBtn.hidden=true;menuLinks.hidden=false;placeMenu()}
+export function hideMenu(){menuLinks.hidden=true;shareBtn.hidden=true}
 function openPanel(kind){placeMenu();lbEl.hidden=true;panelEl.textContent='';const h=document.createElement('h2');panelEl.appendChild(h);
   if(kind==='settings'){h.textContent='SETTINGS';
     [['music','Music volume'],['sfx','Sound effects']].forEach(([key,lab])=>{const l=document.createElement('label');l.textContent=lab;const r=document.createElement('input');r.type='range';r.min=0;r.max=1;r.step=.05;r.value=SET[key];r.id='set-'+key;r.oninput=()=>{SET[key]=+r.value;saveSet();if(key==='music')musicLevel();else click()};l.appendChild(r);panelEl.appendChild(l)});

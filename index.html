@@ -4,6 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>PALM</title>
+<meta name="description" content="A split-second manga reaction game. Faces burst into the panel: blast the threats, let the friends pass. Three onlookers are your lives.">
+<meta name="theme-color" content="#111014">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://palm-nu.vercel.app/">
+<meta property="og:title" content="PALM">
+<meta property="og:description" content="Blast it, or let it pass. A split-second manga reaction game.">
+<meta property="og:image" content="https://palm-nu.vercel.app/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PALM: a masked guardian raises a palm at a scowling face in a red-aura manga panel while three onlookers gasp below.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Zen+Kaku+Gothic+New:wght@500;900&display=swap">
 <style>
@@ -59,7 +72,7 @@ button small{display:block;font-family:var(--body);font-size:11px;letter-spacing
 </style>
 <div id="wrap"><canvas id="c" width="600" height="800" aria-label="PALM game stage"></canvas>
 <button id="btn-pause" type="button" hidden aria-label="Pause"></button>
-<div id="menu-links" hidden><button id="btn-settings" type="button">SETTINGS</button><button id="btn-credits" type="button">CREDITS</button><button id="btn-title" type="button" hidden>TITLE</button></div>
+<div id="menu-links" hidden><button id="btn-settings" type="button">SETTINGS</button><button id="btn-credits" type="button">CREDITS</button><button id="btn-share" type="button" hidden>SHARE</button><button id="btn-title" type="button" hidden>TITLE</button></div>
 <div id="panel" hidden role="dialog" aria-modal="true"></div>
 <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
 <div id="lb" hidden>

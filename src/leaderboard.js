@@ -8,8 +8,16 @@ let lbDb=null,board=[],postedRun=false,myDoc=null,runScore=0;
 // outside claude.ai: the shared Supabase leaderboards project (publishable key, protected by RLS; same table as Neon Striker, tagged by game)
 const SB_REST='https://iysvarvkltihgosbhtaa.supabase.co/rest/v1/scores',SB_KEY='sb_publishable_7Kxs-F6HGMgZmb86V1b9_A_qtyUerCh',SB_H={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'};
 let sbOk=false,myEntry=null;
-async function sbTop(){try{const r=await fetch(SB_REST+'?select=name,score,stage&game=eq.palm&order=score.desc&limit=10',{headers:SB_H});if(!r.ok)return null;return await r.json()}catch(e){return null}}
-async function sbRefresh(){const rows=await sbTop();sbOk=!!rows;if(rows){board=rows.map((r,i)=>({id:myEntry&&r.name===myEntry.name&&r.score===myEntry.score?'mine':'sb'+i,name:r.name,score:r.score}));if(myEntry)myDoc='mine'}if(!lbEl.hidden){lbForm.hidden=!(sbOk&&runScore>0&&!postedRun);if(!lbDb)lbMsg.textContent=!sbOk?'Leaderboard unreachable right now.':postedRun?'Posted.':runScore>0?'':'Score something to get on the board.';renderBoard()}}
+// guards (the same rules live in tools/leaderboard.sql for the database): a name with a slur or swear in it, leetspeak
+// included, is refused: a few unmistakable ones anywhere, the rest only as a whole word ('grape' and 'Hancock' are fine).
+// A row that could not have been scored is never shown: a beat pays at most 925 (100 x the x8 combo, +50 speed, +75 special).
+const ANYWHERE=/fuck|shit|cunt|nigg/,WORD=/^(rape|kys|spic|dick|fag|faggot|penis|porn|kike|chink|nazi|slut|whore|bitch|retard|tranny|hitler|pussy|cock)s?$/;
+const MAX_PER_BEAT=925;
+const badName=n=>{const t=String(n||'').toLowerCase().replace(/[013457@$]/g,c=>({0:'o',1:'i',3:'e',4:'a',5:'s',7:'t','@':'a','$':'s'})[c]);
+  return ANYWHERE.test(t.replace(/[^a-z]/g,''))||t.split(/[^a-z]+/).some(w=>WORD.test(w))};
+const fair=r=>!badName(r.name)&&r.score>=0&&r.score<=(r.stage||r.beats||0)*MAX_PER_BEAT;
+async function sbTop(){try{const r=await fetch(SB_REST+'?select=name,score,stage&game=eq.palm&order=score.desc&limit=40',{headers:SB_H});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+async function sbRefresh(){const rows=await sbTop();sbOk=!!rows;if(rows){board=rows.filter(fair).slice(0,10).map((r,i)=>({id:myEntry&&r.name===myEntry.name&&r.score===myEntry.score?'mine':'sb'+i,name:r.name,score:r.score}));if(myEntry)myDoc='mine'}if(!lbEl.hidden){lbForm.hidden=!(sbOk&&runScore>0&&!postedRun);if(!lbDb)lbMsg.textContent=!sbOk?'Leaderboard unreachable right now.':postedRun?'Posted.':runScore>0?'':'Score something to get on the board.';renderBoard()}}
 try{lbName.value=localStorage.getItem('palm_name')||''}catch(e){}
 export function placeBoard(){const w=document.getElementById('wrap').getBoundingClientRect(),c=cv.getBoundingClientRect(),k=c.width/600;
   // laid out at the canvas's own 600px scale, then scaled with it, so it lines up on every screen
@@ -28,6 +36,7 @@ export function hideBoard(){lbEl.hidden=true;if(document.activeElement===lbName)
 addEventListener('resize',()=>{if(!lbEl.hidden)placeBoard()});
 lbForm.addEventListener('submit',async e=>{e.preventDefault();if(postedRun)return;
   if(!lbDb){const name=lbName.value.trim().slice(0,16);if(!name){lbMsg.textContent='Type a name first.';lbName.focus();return}
+    if(badName(name)){lbMsg.textContent='Pick another name.';lbName.focus();return}
     try{localStorage.setItem('palm_name',name)}catch(e){}
     lbGo.disabled=true;lbMsg.textContent='Posting…';
     const body={game:'palm',name,score:Math.max(0,Math.min(50000000,Math.round(runScore))),grade:'C',stage:Math.max(1,Math.min(999,S.beat||1)),daily:false,date_key:null};
@@ -35,10 +44,11 @@ lbForm.addEventListener('submit',async e=>{e.preventDefault();if(postedRun)retur
     if(ok){postedRun=true;myEntry={name,score:body.score};lbForm.hidden=true;lbMsg.textContent='Posted.';sbRefresh()}else{lbGo.disabled=false;lbMsg.textContent='Could not post. Try again.'}
     return}
   const name=lbName.value.trim().slice(0,14);if(!name){lbMsg.textContent='Type a name first.';lbName.focus();return}
+  if(badName(name)){lbMsg.textContent='Pick another name.';lbName.focus();return}
   try{localStorage.setItem('palm_name',name)}catch(e){}
   lbGo.disabled=true;lbMsg.textContent='Posting…';
   try{const ref=lbDb.collection('scores').doc();myDoc=ref.id;await ref.set({name,score:runScore,beats:S.beat,at:Date.now()});postedRun=true;lbForm.hidden=true;lbMsg.textContent='Posted.';renderBoard()}
   catch(err){lbGo.disabled=false;myDoc=null;lbMsg.textContent=err&&err.code==='invalid_argument'?'You can view the board, but posting needs Contributor access to this page.':'Could not post. Try again.'}});
 (async()=>{try{lbDb=await window.claude?.use?.('db')}catch(e){lbDb=null}
   if(!lbDb)return;
-  lbDb.collection('scores').orderBy('score','desc').limit(10).onSnapshot(snap=>{board=snap.docs.map(d=>({id:d.id,...(d.data()||{})}));if(!lbEl.hidden)renderBoard()},()=>{})})();
+  lbDb.collection('scores').orderBy('score','desc').limit(40).onSnapshot(snap=>{board=snap.docs.map(d=>({id:d.id,...(d.data()||{})})).filter(fair).slice(0,10);if(!lbEl.hidden)renderBoard()},()=>{})})();
