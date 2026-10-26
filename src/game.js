@@ -2,7 +2,7 @@
 // playing on the main menu), title, card, lurk, beat, resolve, fall, over ('x' while a run starts).
 import {ROSTER,S,G,OL,seen,RI,ramp,jabOrHold,dealOrder} from './state.js';
 import {newFig,correctAct,freshType} from './characters.js';
-import {buzz,kiBoom,startMusic,popIn,popSecond,eyesOpen,turnSting,passSound,flinchSound,strikeSound,nothingSound,comboSound,introSound,slumpSound,gameoverSound,shadowStart,shadowStop} from './audio.js';
+import {buzz,kiBoom,startMusic,popIn,popSecond,eyesOpen,turnSting,passSound,flinchSound,strikeSound,nothingSound,comboSound,introSound,slumpSound,gameoverSound} from './audio.js';
 import {panelOpen,showMenu,hideMenu} from './ui.js';
 import {showBoard,hideBoard} from './leaderboard.js';
 
@@ -29,7 +29,7 @@ export function spawn(){
   if(fig.type==='sleeper'||fig.type!=='lurker'&&!(seen.has('lurker')&&!learning&&Math.random()<ramp(S.beat,[[10,0],[25,.3]])))G.lurk=0;
   // the panel sometimes flashes once mid-wait, baiting a flinch (the rule never changes: never act on a shadow)
   if(G.lurk>700&&Math.random()<.4)fig.flashAt=G.lurk*(.3+Math.random()*.4);
-  G.t0=performance.now();S.mode='lurk';if(G.lurk>0)shadowStart(G.lurk);
+  G.t0=performance.now();S.mode='lurk';
 }
 // a mistake: one onlooker leaves ('ko' = knocked out by a threat let through, 'flee' = anything else)
 function strike(kind='flee',thud=true){const alive=OL.filter(o=>!o.gone);if(alive.length){const o=alive[RI(alive.length)];o.gone=performance.now();o.kind=kind}S.strikes++;if(S.strikes===3)G.killer=G.fig&&!G.fig.empty?G.fig:null;S.combo=1;G.shake=16;buzz([50,40,50]);G.missT=performance.now();G.missSeed=Math.random()*100;strikeSound(kind,thud)}
@@ -45,7 +45,7 @@ export function act(a){
   if(S.mode==='card'&&G.card.kind==='intro'&&now-G.card.t>500){spawn();return}
   if(S.mode==='lurk'&&G.t0+G.lurk-now<=80){G.buffered=a;return}
   // a move made too early (at a shadow, at empty air, at shut eyes, before a turn) is a strike like any other mistake
-  const flinch=()=>{shadowStop();strike('flee',false);flinchSound();G.res={a:'flinch',ok:false,n:S.strikes,t:now,dur:500,lurk:S.mode==='lurk'};S.mode='resolve';S.beat++};
+  const flinch=()=>{strike('flee',false);flinchSound();G.res={a:'flinch',ok:false,n:S.strikes,t:now,dur:500,lurk:S.mode==='lurk'};S.mode='resolve';S.beat++};
   if(S.mode==='lurk'){flinch();return}
   if(S.mode!=='beat')return;
   const rt=now-G.t0-G.lurk,k=rt/G.win,want=correctAct(fig,k);
@@ -76,6 +76,6 @@ export function update(t){
   if(S.mode==='fall'&&t-G.fallT>1600){S.mode='over';gameoverSound();showBoard();showMenu();if(S.score>S.best){S.best=S.score;try{localStorage.setItem('palm_best',S.best)}catch(e){}}}
 }
 export const playing=()=>['lurk','beat','resolve','card'].includes(S.mode);
-export function pause(){if(!G.paused&&playing()){G.paused=true;G.pauseAt=performance.now();G.buffered=null;shadowStop();showMenu()}}
-export function resume(){if(!G.paused)return;const d=performance.now()-G.pauseAt;G.t0+=d;if(G.res)G.res.t+=d;if(G.card)G.card.t+=d;G.paused=false;if(S.mode==='lurk')shadowStart(G.t0+G.lurk-performance.now());hideMenu()}
-export function goTitle(){shadowStop();G.paused=false;G.buffered=null;hideBoard();G.fig=null;G.res=null;G.card=null;G.shake=0;G.missT=-9999;G.killer=null;G.learnLeft=0;OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'title',score:0,combo:1,strikes:0,beat:0,heat:0});showMenu()}
+export function pause(){if(!G.paused&&playing()){G.paused=true;G.pauseAt=performance.now();G.buffered=null;showMenu()}}
+export function resume(){if(!G.paused)return;const d=performance.now()-G.pauseAt;G.t0+=d;if(G.res)G.res.t+=d;if(G.card)G.card.t+=d;G.paused=false;hideMenu()}
+export function goTitle(){G.paused=false;G.buffered=null;hideBoard();G.fig=null;G.res=null;G.card=null;G.shake=0;G.missT=-9999;G.killer=null;G.learnLeft=0;OL.forEach(o=>{o.gone=0;o.kind=''});Object.assign(S,{mode:'title',score:0,combo:1,strikes:0,beat:0,heat:0});showMenu()}

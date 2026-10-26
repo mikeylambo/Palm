@@ -27,7 +27,6 @@ save('pop',fade(load('pop.mp3',.02,.17)),-6)
 save('pop2',fade(load('pop_twins.mp3',.125,.2),1,20),-6)           # the double pop's last hit: the second Twin
 save('eyes_open',fade(hp(load('eyes_open.mp3',0,.38))),-7)
 save('turn',fade(verb(fade(load('turn.mp3',0,.46)),.45,.3),2,120),-4)
-save('shadow',fade(load('shadow.mp3',.15,2.3),40,15),-8)
 save('nothing',fade(load('nothing.mp3',0,.48),2,80),-11)
 save('flinch',fade(load('flinch.mp3',.17,.528),2,50),-7)
 save('strike',fade(load('strike.mp3',0,.48),2,80),-5)

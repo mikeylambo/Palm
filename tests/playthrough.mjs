@@ -67,8 +67,8 @@ const run=await page.evaluate(TYPES=>{
   return {seen:[...seen],intros,debutBeforeIntro,runs,beat:P.S.beat,strikes:P.S.strikes,mode:P.S.mode};
 },TYPES);
 console.log(`played to beat ${run.beat}, ${run.strikes} strikes`);
-await page.waitForFunction(()=>PALM.sfx>=14,null,{timeout:5000}).catch(()=>{});
-check(await page.evaluate(()=>PALM.sfx)===14,'all 14 sound files load and decode');
+await page.waitForFunction(()=>PALM.sfx>=13,null,{timeout:5000}).catch(()=>{});
+check(await page.evaluate(()=>PALM.sfx)===13,'all 13 sound files load and decode');
 await page.waitForFunction(()=>PALM.music,null,{timeout:8000}).catch(()=>{});
 const mus=await page.evaluate(()=>PALM.music);
 check(mus&&Math.abs(mus.loopStart-32.438)<.01&&Math.abs(mus.loopEnd-236.522)<.01,'music decodes and loops 0:32.4 to 3:56.5'+(mus?'':' (no music playing)'));
