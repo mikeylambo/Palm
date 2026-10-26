@@ -36,12 +36,20 @@ export function shadowStart(ms){shadowStop();if(!BUF.shadow)return;const len=BUF
   const off=Math.max(0,len-s),at=Math.max(0,s-len);drone=sfx('shadow',.9,1,off,at);if(drone){const t=ac.currentTime+end;drone.gn.gain.setValueAtTime(.9*SET.sfx,t-.02);drone.gn.gain.linearRampToValueAtTime(0,t);drone.s.stop(t+.01)}}
 export function shadowStop(){if(drone){try{drone.s.stop()}catch(e){}drone=null}}
 
-// music: music.mp3 in the repo root, looping. It plays at full level through play (no ducking while you wait);
+// music: music.mp3 (the owner's Introspecs, 169 BPM), baked by tools/bake_music.py so its last moments turn into the
+// bars before LOOP[0]. The first 32 s play once, then LOOP[0]..LOOP[1] (144 bars) loops sample-accurately in Web Audio
+// (an <audio loop> leaves a gap and can't keep an intro). Both points sit 60 ms inside the baked hold, so a decoder that
+// shifts the file by its MP3 padding still lands on the seam. Full level through play (no ducking while you wait);
 // it only drops during pause and the game-over slump.
-const bgm=document.getElementById('bgm');let mg=null;
-function hookMusic(){try{const src=ac.createMediaElementSource(bgm);mg=ac.createGain();src.connect(mg).connect(ac.destination);bgm.volume=1}catch(e){mg=null}}
-export function startMusic(){try{ctx();if(bgm.paused)bgm.play().catch(()=>{})}catch(e){}musicLevel()}
+const LOOP=[32.438,236.522];let mg=null,mus=null,musBuf=null,musWant=false;
+const musData=fetch('music.mp3').then(r=>r.ok?r.arrayBuffer():null).catch(()=>null); // download starts with the page
+function hookMusic(){mg=ac.createGain();mg.connect(ac.destination);
+  musData.then(b=>b&&new Promise((ok,no)=>ac.decodeAudioData(b,ok,no))).then(d=>{if(d){musBuf=d;playMusic()}}).catch(()=>{})}
+function playMusic(){if(mus||!musBuf||!musWant)return;mus=ac.createBufferSource();mus.buffer=musBuf;mus.loop=true;
+  mus.loopStart=LOOP[0];mus.loopEnd=Math.min(LOOP[1],musBuf.duration);mus.connect(mg);mus.start()}
+export const musicState=()=>mus?{loopStart:mus.loopStart,loopEnd:mus.loopEnd}:null;
+export function startMusic(){try{ctx();musWant=true;playMusic()}catch(e){}musicLevel()}
 export function musicLevel(){
   const v=SET.music*(G.paused||S.mode==='fall'?.25:1);
-  try{if(mg)mg.gain.setTargetAtTime(v,ac.currentTime,.04);else bgm.volume=v}catch(e){}
+  try{if(mg)mg.gain.setTargetAtTime(v,ac.currentTime,.04)}catch(e){}
 }

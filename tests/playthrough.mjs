@@ -62,6 +62,9 @@ const run=await page.evaluate(TYPES=>{
 console.log(`played to beat ${run.beat}, ${run.strikes} strikes`);
 await page.waitForFunction(()=>PALM.sfx>=14,null,{timeout:5000}).catch(()=>{});
 check(await page.evaluate(()=>PALM.sfx)===14,'all 14 sound files load and decode');
+await page.waitForFunction(()=>PALM.music,null,{timeout:8000}).catch(()=>{});
+const mus=await page.evaluate(()=>PALM.music);
+check(mus&&Math.abs(mus.loopStart-32.438)<.01&&Math.abs(mus.loopEnd-236.522)<.01,'music decodes and loops 0:32.4 to 3:56.5'+(mus?'':' (no music playing)'));
 for(const t of TYPES)check(run.seen.includes(t),`${t} appeared`);
 const order=await page.evaluate(()=>{let met=null;try{met=localStorage.getItem('palm_metall')}catch{}return {met,first:JSON.stringify(PALM.AT)}});
 check(order.first===JSON.stringify({wanderer:0,lurker:10,sleeper:16,twins:23,turncoat:30}),'first run uses the teaching order');

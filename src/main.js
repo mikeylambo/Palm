@@ -1,7 +1,7 @@
 // PALM entry point: wires the modules and runs the main loop.
 import {S,G,AT} from './state.js';
 import {update} from './game.js';
-import {musicLevel,sfxLoaded} from './audio.js';
+import {musicLevel,sfxLoaded,musicState} from './audio.js';
 import {draw} from './render.js';
 import './ui.js';
 import './leaderboard.js';
@@ -17,4 +17,4 @@ function frame(t){
 }
 requestAnimationFrame(frame);
 // read-only hook for the headless tests
-window.PALM={get S(){return S},get G(){return G},get fig(){return G.fig},get AT(){return AT},get sfx(){return sfxLoaded()}};
+window.PALM={get S(){return S},get G(){return G},get fig(){return G.fig},get AT(){return AT},get sfx(){return sfxLoaded()},get music(){return musicState()}};

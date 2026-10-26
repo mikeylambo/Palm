@@ -4,7 +4,7 @@ PALM is a WarioWare-paced reaction game. A masked, robed guardian holds up a pal
 
 - Live: https://palm-nu.vercel.app (Vercel project `palm`, deploys on every push to `main`)
 - Owner: Mikey Lambo (credits use this name)
-- Status: design is finished. What's left is bug fixing, a light refactor, and music.
+- Status: design is finished, final music is in. What's left is bug fixing and playtesting.
 
 ## Design rules (settled with the owner, do not reopen)
 
@@ -27,7 +27,7 @@ The game got better every time something was cut. Treat these as hard constraint
 - No rule moments: `LET NOTHING PASS` / `MERCY` were cut.
 - **Never cheat the player:** every mistake must be readable on screen at the moment you act. No type may look identical to another with a different rule.
 - **Kind tone:** no children, no crying, no demon masks.
-- **Music target: about 174 BPM.** The game is not beat-synced; the track loops underneath. Placeholder now: Logica, "Palm OST" (~169 BPM), fade-out trimmed so it loops at 3:21.
+- **Music: the owner's own track, Introspecs (169.35 BPM).** The game is not beat-synced; the track loops underneath: the first 32 s play once per session, then 0:32.4–3:56.5 (144 bars) loops without a seam.
 
 ## Roster (unlock beat)
 
@@ -65,7 +65,7 @@ Three onlookers (bowl cut, spiky, topknot). Letting a threat through knocks one 
 - `src/leaderboard.js`: shared Supabase project `leaderboards`, table `scores`, rows tagged `game: 'palm'` (same setup as `neonstriker/src/systems/online.js`). Publishable key is client-safe; RLS protects the table. Guards: names with a slur or swear (leetspeak included) are refused, and rows scoring more than 925 per beat (the most a beat can pay) are never shown. `tools/leaderboard.sql` holds the same rules as database constraints, run once in the Supabase SQL editor. There is also a `window.claude` db path used only when the game runs as a claude.ai artifact; it is inert on Vercel.
 - `tests/playthrough.mjs` (`npm test`): headless Playwright run on a seeded virtual clock; plays until every type appears, checks intro cards, pause keys, TITLE, game over and console errors. `.vercelignore` keeps tests and `package.json` out of the deploy, so Vercel stays a static site.
 - `src/main.js`: main loop (`frame()`), plus a read-only `window.PALM` hook used by the tests
-- Music: `<audio id="bgm" src="music.mp3">` in the repo root. Replace the file to change the track.
+- Music: `music.mp3` in the repo root, decoded into a Web Audio buffer and looped sample-accurately between `LOOP` points in `audio.js` (an `<audio loop>` leaves a gap). It is baked by `tools/bake_music.py`, whose docstring explains the seam; to change the track, rebake and paste the `LOOP` line it prints.
 
 ## Status
 
@@ -75,4 +75,5 @@ Pause note: the owner's report never reproduced headless. The live build had the
 
 ## Remaining
 
-1. Final music (about 174 BPM): replace the placeholder `music.mp3`.
+1. Supabase: run `tools/leaderboard.sql` once (score and name guards as database constraints).
+2. Playtest with people who have never seen the game.
