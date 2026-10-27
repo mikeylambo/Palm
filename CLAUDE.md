@@ -77,3 +77,7 @@ Pause note: the owner's report never reproduced headless. The live build had the
 ## Remaining
 
 1. Playtest with people who have never seen the game.
+
+## itch.io
+
+`tools/build_itch.sh` zips the game files into `dist/palm-itch.zip` (gitignored). Upload it as an HTML game, "This file will be played in the browser". Suggested embed: 960×600, mobile friendly, fullscreen button on.
