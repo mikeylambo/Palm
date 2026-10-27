@@ -80,4 +80,4 @@ Pause note: the owner's report never reproduced headless. The live build had the
 
 ## itch.io
 
-`tools/build_itch.sh` zips the game files into `dist/palm-itch.zip` (gitignored). Upload it as an HTML game, "This file will be played in the browser". Suggested embed: 960×600, mobile friendly, fullscreen button on.
+`tools/build_itch.sh` zips the game files into `dist/palm-itch.zip` (gitignored). Upload it as an HTML game, "This file will be played in the browser". Suggested embed: 540×860 (the stage is portrait), mobile friendly (portrait), fullscreen button on.
