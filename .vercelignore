@@ -5,3 +5,4 @@ node_modules/
 CLAUDE.md
 tools/
 dist/
+store/
