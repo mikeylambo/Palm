@@ -1,0 +1,45 @@
+<!doctype html><html><head><link href="https://fonts.googleapis.com/css2?family=Bangers&display=block" rel="stylesheet">
+<style>body{margin:0;background:#111014}canvas{display:block}</style></head><body><canvas id=c width=3000 height=3000></canvas>
+<script>
+const C={paper:'#eef59a',ink:'#111014',violet:'#7b5bd6',grace:'#e2a92b',threat:'#e0304a'};
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+const j=k=>{const s=Math.sin(3.1*12.9898+k*78.233)*43758.5453;return (s-Math.floor(s))-.5};
+const FINGERS=[33,40,38,29],J=k=>j(k)*1.6;
+function handPath(){g.beginPath();g.moveTo(-16,14);
+  g.lineTo(-19+J(1),-10);g.quadraticCurveTo(-30,-16,-36+J(2),-30);g.quadraticCurveTo(-38,-38,-31,-37);g.quadraticCurveTo(-25,-34,-20,-30);
+  g.lineTo(-20+J(3),-40);
+  for(let i=0;i<4;i++){const x0=-20+i*10,x1=x0+9.5,top=-40-FINGERS[i]+J(10+i);g.lineTo(x0,top+4);g.quadraticCurveTo(x0+4.75,top-3,x1,top+4);g.lineTo(x1,-42+(i<3?2:0))}
+  g.lineTo(20+J(4),-36);g.quadraticCurveTo(21,-12,18,14);g.closePath();}
+function jitterPoly(pts,amt){g.beginPath();pts.forEach(([x,y],i)=>{const dx=(rnd()-.5)*amt,dy=(rnd()-.5)*amt;i?g.lineTo(x+dx,y+dy):g.moveTo(x+dx,y+dy)});g.closePath()}
+document.fonts.load('400px Bangers').then(()=>{
+  const W=3000;
+  g.fillStyle=C.ink;g.fillRect(0,0,W,W);
+  // tilted manga panel
+  const P=[[170,230],[2850,120],[2790,2860],[140,2740]];
+  g.save();jitterPoly(P,20);g.clip();
+  const cx=1540,cy=1600;
+  const gr=g.createRadialGradient(cx,cy,60,cx,cy,2100);gr.addColorStop(0,'#fff');gr.addColorStop(.18,'#efe8ff');gr.addColorStop(.42,C.violet);gr.addColorStop(1,'#2a1d55');
+  g.fillStyle=gr;g.fillRect(0,0,W,W);
+  g.strokeStyle=C.ink;
+  for(let i=0;i<220;i++){const a=i/220*Math.PI*2+(rnd()-.5)*.02,r1=520+rnd()*380,r2=2600;g.lineWidth=2+rnd()*12;g.beginPath();g.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);g.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);g.stroke()}
+  // ink flakes flying off the blast
+  g.fillStyle=C.ink;for(let i=0;i<70;i++){const a=rnd()*7,r=420+rnd()*900,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r,s=8+rnd()*34;g.save();g.translate(x,y);g.rotate(rnd()*7);g.beginPath();g.moveTo(-s,-s*.4);g.lineTo(s*.8,-s*.7);g.lineTo(s,s*.5);g.lineTo(-s*.5,s*.8);g.closePath();g.fill();g.restore()}
+  // the palm: huge, from behind, gold cuff
+  const S=17,wx=1560,wy=2430,tilt=.07;
+  g.save();g.translate(wx,wy);g.rotate(tilt);
+  g.fillStyle='#b7b3c9';g.strokeStyle=C.ink;g.lineWidth=34;
+  g.beginPath();g.moveTo(-34*S,40*S);g.lineTo(-26*S,22*S);g.lineTo(26*S,22*S);g.lineTo(36*S,40*S);g.closePath();g.fill();g.stroke(); // sleeve
+  g.save();g.scale(S,S);g.lineWidth=34/S;g.shadowColor='#fff';g.shadowBlur=180;g.fillStyle='#d8d4e6';handPath();g.fill();g.shadowBlur=0;g.stroke();g.restore();
+  g.fillStyle=C.grace;g.lineWidth=30;g.beginPath();g.rect(-27*S,4*S,54*S,20*S);g.fill();g.stroke();
+  g.lineWidth=16;g.beginPath();g.moveTo(-27*S,14*S);g.lineTo(27*S,14*S);g.stroke();
+  g.restore();
+  g.restore();
+  g.lineWidth=40;g.strokeStyle=C.ink;jitterPoly(P,0);g.stroke();
+  // title
+  g.save();g.translate(1500,560);g.rotate(-.05);g.font='760px Bangers';g.textAlign='center';g.textBaseline='middle';
+  g.lineJoin='round';g.lineWidth=90;g.strokeStyle=C.ink;g.strokeText('PALM',0,0);g.fillStyle=C.paper;g.fillText('PALM',0,0);
+  g.restore();
+  window.done=1;
+});
+</script></body></html>
